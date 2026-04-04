@@ -2,200 +2,346 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>All Fours — Trinidad</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --felt: #1b4d32; --felt-light: #266040; --felt-dark: #0e2a1a;
-  --gold: #c9a84c; --gold-light: #e8c96e; --gold-dim: rgba(201,168,76,0.3);
-  --cream: #f5edd6; --red: #c0392b; --dark: #080f09;
-  --card-w: 62px; --card-h: 90px;
+  --bg: #232354; --table: #c8651a; --table-dark: #a84f0f;
+  --header: #0f0f1e; --gold: #f0c040; --cream: #fff8ee;
+  --teamA: #4a90d9; --teamB: #e05555;
+  --card-w: 72px; --card-h: 105px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;}
-body{
-  background:var(--felt-dark);font-family:'Crimson Pro',serif;color:var(--cream);min-height:100vh;
-  background-image:radial-gradient(ellipse at 50% 40%,var(--felt-light) 0%,var(--felt) 45%,var(--felt-dark) 100%),
-  repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.008) 3px,rgba(255,255,255,0.008) 6px);
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;width:100%;overflow:hidden;background:#000;}
+#app{
+  width:100vw; height:100vh;
+  display:flex; flex-direction:column;
+  font-family:'Inter',sans-serif;
+  background:var(--table);
+  background-image:radial-gradient(ellipse at 50% 50%, #d4712a 0%, var(--table) 50%, var(--table-dark) 100%);
 }
-#app{min-height:100vh;display:flex;flex-direction:column;}
-.screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;overflow-y:auto;}
-.screen.active{display:flex;}
-.logo{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,9vw,5rem);font-weight:900;color:var(--gold);text-shadow:0 0 50px rgba(201,168,76,0.35),3px 5px 0 rgba(0,0,0,0.6);letter-spacing:0.03em;line-height:1;text-align:center;}
-.logo em{color:var(--cream);font-style:normal;}
-.tagline{font-style:italic;color:rgba(245,237,214,0.55);font-size:1.05rem;margin:6px 0 32px;letter-spacing:0.12em;}
-.suits-row{font-size:1.6rem;letter-spacing:0.35em;color:var(--gold);margin-bottom:6px;opacity:0.8;}
-.panel{background:rgba(0,0,0,0.4);border:1px solid var(--gold-dim);border-radius:18px;padding:28px 28px 24px;width:100%;max-width:390px;backdrop-filter:blur(6px);}
-input{width:100%;padding:11px 14px;background:rgba(0,0,0,0.35);border:1px solid var(--gold-dim);border-radius:9px;color:var(--cream);font-family:'Crimson Pro',serif;font-size:1rem;outline:none;transition:border-color .2s;margin-bottom:11px;}
-input:focus{border-color:var(--gold);}input::placeholder{color:rgba(245,237,214,0.3);}
-input.big-code{text-align:center;font-size:2rem;letter-spacing:.45em;font-family:'Playfair Display',serif;text-transform:uppercase;}
-.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.05em;}
-.btn-gold{background:linear-gradient(135deg,var(--gold),#9a6f20);color:var(--dark);}
-.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(201,168,76,0.4);}
-.btn-ghost{background:rgba(255,255,255,0.07);color:var(--cream);border:1px solid rgba(255,255,255,0.13);margin-top:10px;}
-.btn-ghost:hover{background:rgba(255,255,255,0.13);}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
-.divider{text-align:center;color:rgba(245,237,214,0.3);font-size:.82rem;margin:16px 0;position:relative;}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:rgba(245,237,214,0.12);}
-.divider::before{left:0;}.divider::after{right:0;}
-.player-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 12px;}
-.player-slot{background:rgba(0,0,0,0.3);border:1px dashed rgba(255,255,255,0.15);border-radius:10px;padding:10px 12px;font-size:.88rem;min-height:52px;display:flex;flex-direction:column;justify-content:center;}
-.player-slot.filled{border-color:var(--gold-dim);border-style:solid;}
-.slot-num{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,237,214,0.4);margin-bottom:2px;}
-.slot-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold-light);}
-.slot-team{font-size:.72rem;margin-top:3px;}.team-a{color:#5dade2;}.team-b{color:#ec7063;}
-.code-box{text-align:center;padding:14px;background:rgba(201,168,76,0.08);border:2px dashed var(--gold-dim);border-radius:12px;margin:14px 0;}
-.code-big{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold-light);letter-spacing:.3em;}
-.code-label{font-size:.72rem;color:rgba(245,237,214,0.45);text-transform:uppercase;letter-spacing:.18em;}
-.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
-.team-col{background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;}
-.team-col h4{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.team-col.ta h4{color:#5dade2;}.team-col.tb h4{color:#ec7063;}
-.assign-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.88rem;}
-.assign-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.assign-btn{padding:3px 10px;border:none;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:'Playfair Display',serif;font-weight:700;}
-.assign-btn.to-a{background:rgba(93,173,226,0.25);color:#5dade2;border:1px solid rgba(93,173,226,0.3);}
-.assign-btn.to-b{background:rgba(236,112,99,0.25);color:#ec7063;border:1px solid rgba(236,112,99,0.3);}
 
-/* GAME */
-#gameScreen{padding:0;justify-content:flex-start;min-height:100vh;}
-.g-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(0,0,0,0.35);border-bottom:1px solid var(--gold-dim);flex-shrink:0;}
-.score-badge{background:rgba(0,0,0,0.45);border:1px solid var(--gold-dim);border-radius:16px;padding:4px 12px;font-family:'Playfair Display',serif;font-size:.88rem;}
-.score-badge .pts{color:var(--gold);font-weight:700;font-size:1rem;}
-.trump-badge{display:flex;align-items:center;gap:5px;font-size:.85rem;}
-.trump-suit{font-size:1.3rem;}
-.opp-top{text-align:center;padding:6px 10px 4px;flex-shrink:0;}
-.opp-top-row{display:flex;justify-content:center;gap:16px;}
-.opp-player{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.p-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,237,214,0.45);}
-.p-name{font-size:.78rem;color:var(--gold-light);font-family:'Playfair Display',serif;}
-.mini-hand{display:flex;gap:2px;}
-.card-back-mini{width:22px;height:34px;border-radius:3px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.15);flex-shrink:0;}
-.side-players{display:flex;justify-content:space-between;align-items:center;padding:0 6px;flex:1;}
-.side-opp{display:flex;flex-direction:column;align-items:center;gap:4px;width:36px;}
-.side-cards{display:flex;flex-direction:column;gap:2px;}
-.card-back-side{width:32px;height:20px;border-radius:3px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.15);}
-.center-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px;}
-.trick-table{display:grid;grid-template-columns:1fr 80px 1fr;grid-template-rows:auto auto auto;gap:4px;width:100%;max-width:300px;}
-.trick-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
-.trick-slot-label{font-size:.6rem;color:rgba(245,237,214,0.4);text-transform:uppercase;letter-spacing:.08em;}
-.trick-center{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:rgba(245,237,214,0.15);}
-.status-pill{background:rgba(0,0,0,0.4);border:1px solid var(--gold-dim);border-radius:20px;padding:5px 16px;font-size:.85rem;color:var(--gold-light);font-style:italic;text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center;width:100%;max-width:300px;}
-.action-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
-.act-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Playfair Display',serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.04em;}
-.act-btn.gold{background:var(--gold);color:var(--dark);}
-.act-btn.danger{background:#7b241c;color:#fff;}
-.act-btn.blue{background:#1a5276;color:#fff;}
-.act-btn:hover{opacity:.85;transform:translateY(-1px);}
-.act-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-.my-area{padding:5px 8px 10px;background:rgba(0,0,0,0.25);border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
-.my-hand{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;}
-.card{width:var(--card-w);height:var(--card-h);border-radius:7px;background:#fff;border:1.5px solid #ddd;display:flex;flex-direction:column;padding:3px 4px;cursor:default;box-shadow:2px 3px 10px rgba(0,0,0,0.5);transition:transform .15s,box-shadow .15s;position:relative;user-select:none;flex-shrink:0;}
-.card.playable{cursor:pointer;border-color:var(--gold);box-shadow:2px 3px 10px rgba(0,0,0,0.4),0 0 0 2px rgba(201,168,76,0.5);}
-.card.playable:hover{transform:translateY(-9px) scale(1.05);box-shadow:4px 10px 22px rgba(0,0,0,0.55),0 0 0 2px var(--gold);}
-.card.trump-card{border-color:#c0392b;}
-.c-rank{font-size:.9rem;font-weight:700;line-height:1;font-family:'Playfair Display',serif;}
-.c-suit{font-size:.78rem;line-height:1;}
-.c-mid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.7rem;}
-.c-bot{transform:rotate(180deg);}
-.card.red .c-rank,.card.red .c-suit,.card.red .c-mid{color:var(--red);}
+/* ══ SCREENS ══ */
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:16px;overflow-y:auto;background:var(--header);}
+.screen.active{display:flex;}
+
+/* Lobby */
+.lobby-logo{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);text-shadow:2px 4px 0 rgba(0,0,0,0.5);text-align:center;margin-bottom:4px;}
+.lobby-sub{color:rgba(255,255,255,0.4);font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px;}
+.lobby-panel{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;width:100%;max-width:360px;}
+.l-input{width:100%;padding:12px 14px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:1rem;outline:none;margin-bottom:10px;}
+.l-input:focus{border-color:var(--gold);}
+.l-input::placeholder{color:rgba(255,255,255,0.3);}
+.l-input.code{text-align:center;font-size:1.8rem;letter-spacing:.4em;font-family:'Playfair Display',serif;text-transform:uppercase;}
+.l-btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.03em;}
+.l-btn.primary{background:var(--gold);color:#111;}
+.l-btn.primary:hover{filter:brightness(1.1);}
+.l-btn.ghost{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);margin-top:8px;}
+.l-btn.ghost:hover{background:rgba(255,255,255,0.14);}
+.l-btn:disabled{opacity:.4;cursor:not-allowed;}
+.divider{text-align:center;color:rgba(255,255,255,0.25);font-size:.8rem;margin:14px 0;}
+
+/* Waiting */
+.code-display{text-align:center;padding:16px;background:rgba(240,192,64,0.1);border:2px dashed rgba(240,192,64,0.4);border-radius:14px;margin:14px 0;width:100%;max-width:360px;}
+.code-big{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);letter-spacing:.35em;}
+.code-hint{font-size:.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.15em;margin-top:4px;cursor:pointer;}
+.p-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px;margin:12px 0;}
+.p-slot{background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.15);border-radius:10px;padding:10px 12px;min-height:50px;display:flex;flex-direction:column;justify-content:center;}
+.p-slot.filled{border-style:solid;border-color:rgba(240,192,64,0.3);}
+.slot-n{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,0.35);margin-bottom:2px;}
+.slot-name{font-weight:700;font-size:.95rem;color:var(--gold);}
+.slot-team{font-size:.7rem;margin-top:2px;}
+.ta{color:var(--teamA);}.tb{color:var(--teamB);}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px;margin:12px 0;}
+.team-col{background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;}
+.team-col h4{font-size:.9rem;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.team-col.ta h4{color:var(--teamA);}.team-col.tb h4{color:var(--teamB);}
+.a-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.85rem;}
+.a-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;}
+.a-btn{padding:3px 9px;border:none;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;}
+.a-btn.to-a{background:rgba(74,144,217,0.25);color:var(--teamA);border:1px solid rgba(74,144,217,0.4);}
+.a-btn.to-b{background:rgba(224,85,85,0.25);color:var(--teamB);border:1px solid rgba(224,85,85,0.4);}
+
+/* ══ GAME LAYOUT ══ */
+#gameScreen{
+  display:none;flex-direction:column;
+  width:100%;height:100%;
+  background:var(--table);
+  background-image:radial-gradient(ellipse at 50% 50%,#d4712a 0%,var(--table) 50%,var(--table-dark) 100%);
+  padding:0; overflow:hidden;
+}
+#gameScreen.active{display:flex;}
+
+/* Score header */
+.g-header{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  background:var(--header);padding:6px 10px;flex-shrink:0;
+  border-bottom:2px solid rgba(240,192,64,0.2);
+  min-height:64px;
+}
+.team-score{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.team-score.left{align-items:flex-start;padding-left:4px;}
+.team-score.right{align-items:flex-end;padding-right:4px;}
+.ts-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,0.45);}
+.ts-pts{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;line-height:1;}
+.ts-pts.ta{color:var(--teamA);}.ts-pts.tb{color:var(--teamB);}
+.ts-game{font-size:.75rem;color:rgba(255,255,255,0.5);}
+.header-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.trump-icon{font-size:1.5rem;line-height:1;}
+.trump-count{font-size:.7rem;color:rgba(255,255,255,0.5);}
+
+/* Top opponent */
+.opp-top{display:flex;justify-content:center;padding:4px 8px 2px;flex-shrink:0;}
+.opp-box{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.opp-avatar{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid rgba(255,255,255,0.15);}
+.opp-avatar.turn{border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,0.5);}
+.opp-name{font-size:.65rem;color:rgba(255,255,255,0.7);text-align:center;}
+.opp-cards{display:flex;gap:2px;margin-top:1px;}
+.mini-card{width:14px;height:22px;border-radius:2px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.2);flex-shrink:0;}
+
+/* Middle row */
+.mid-row{display:flex;flex:1;min-height:0;padding:4px 6px;}
+.side-opp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:44px;flex-shrink:0;}
+.side-name{font-size:.6rem;color:rgba(255,255,255,0.6);writing-mode:vertical-rl;text-orientation:mixed;}
+.side-cards-v{display:flex;flex-direction:column;gap:3px;}
+.mini-card-h{width:28px;height:16px;border-radius:2px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.2);}
+
+/* Center table */
+.center-table{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px;}
+
+/* Kick card area */
+.kick-area{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.kick-label{font-size:.65rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;}
+.kick-bonus-tag{background:rgba(240,192,64,0.2);border:1px solid rgba(240,192,64,0.4);border-radius:20px;padding:2px 10px;font-size:.72rem;color:var(--gold);margin-top:2px;}
+
+/* Trick slots */
+.trick-grid{display:grid;grid-template-columns:80px 80px 80px;grid-template-rows:auto auto auto;gap:3px;}
+.t-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.t-slot-empty{width:62px;height:88px;border-radius:8px;border:1.5px dashed rgba(255,255,255,0.15);background:rgba(0,0,0,0.1);}
+.t-name{font-size:.6rem;color:rgba(255,255,255,0.4);}
+.t-center{display:flex;align-items:center;justify-content:center;font-size:.9rem;color:rgba(255,255,255,0.2);}
+
+/* Status */
+.status-bar{background:rgba(0,0,0,0.35);border-radius:20px;padding:4px 14px;font-size:.78rem;color:var(--gold);text-align:center;font-style:italic;}
+.action-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.act-btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s;}
+.act-btn.gold{background:var(--gold);color:#111;}
+.act-btn.red{background:#8b2020;color:#fff;}
+.act-btn.blue{background:#1a4a7a;color:#fff;}
+.act-btn:hover{filter:brightness(1.15);transform:translateY(-1px);}
+
+/* Bottom toolbar */
+.bottom-bar{background:rgba(0,0,0,0.5);padding:5px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:4px;}
+.suit-btns{display:flex;gap:4px;}
+.suit-filter{width:34px;height:34px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.suit-filter:hover,.suit-filter.active{background:rgba(240,192,64,0.2);border-color:var(--gold);}
+.suit-filter.red-s{color:#e74c3c;}.suit-filter.blk-s{color:#eee;}
+.sort-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;}
+.sort-btn:hover{background:rgba(255,255,255,0.15);}
+.game-counter{display:flex;gap:6px;align-items:center;}
+.gc-label{font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em;}
+.gc-val{font-size:.85rem;font-weight:700;}
+
+/* Hand area */
+.hand-area{padding:4px 6px 6px;flex-shrink:0;min-height:0;}
+.my-label{font-size:.62rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;text-align:center;}
+.hand-scroll{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;}
+
+/* Cards */
+.card{
+  width:var(--card-w);height:var(--card-h);
+  border-radius:8px;background:#fff;border:1.5px solid #ccc;
+  display:flex;flex-direction:column;padding:4px 4px 2px;
+  cursor:default;box-shadow:2px 4px 8px rgba(0,0,0,0.5);
+  transition:transform .15s,box-shadow .15s;
+  position:relative;user-select:none;flex-shrink:0;
+}
+.card.playable{cursor:pointer;border-color:#f0c040;box-shadow:2px 4px 8px rgba(0,0,0,0.4),0 0 0 2px rgba(240,192,64,0.6);}
+.card.playable:hover,.card.playable:active{transform:translateY(-10px);box-shadow:3px 12px 20px rgba(0,0,0,0.6),0 0 0 2px var(--gold);}
+.card.trump-c{border-color:#e74c3c;}
+.c-top{display:flex;flex-direction:column;line-height:1;}
+.c-rank{font-size:.95rem;font-weight:900;font-family:'Playfair Display',serif;}
+.c-suit{font-size:.8rem;}
+.c-mid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.9rem;}
+.c-bot{transform:rotate(180deg);display:flex;flex-direction:column;line-height:1;}
+.card.red .c-rank,.card.red .c-suit,.card.red .c-mid{color:#c0392b;}
 .card.black .c-rank,.card.black .c-suit,.card.black .c-mid{color:#111;}
-.kick-display{background:rgba(0,0,0,0.3);border:1px solid var(--gold-dim);border-radius:12px;padding:10px 14px;text-align:center;}
-.kick-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(245,237,214,0.45);margin-bottom:6px;}
-.kick-bonuses{margin-top:6px;font-size:.78rem;color:var(--gold-light);}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;}
+/* Trick card smaller */
+.card.small{width:58px;height:82px;}
+.card.small .c-rank{font-size:.8rem;}
+.card.small .c-mid{font-size:1.5rem;}
+.card.small .c-suit{font-size:.7rem;}
+/* Kick card */
+.kick-card{width:70px;height:100px;}
+.kick-card .c-mid{font-size:2.2rem;}
+
+/* Modals */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;}
 .modal.open{display:flex;}
-.modal-box{background:linear-gradient(160deg,#1e3d2a,#0e2018);border:1px solid var(--gold-dim);border-radius:18px;padding:26px 28px;text-align:center;max-width:320px;width:92%;}
-.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem;margin-bottom:8px;}
-.modal-box p{color:rgba(245,237,214,0.65);font-size:.9rem;margin-bottom:18px;font-style:italic;line-height:1.5;}
-.suit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.suit-btn{padding:14px;border:1.5px solid rgba(255,255,255,0.13);border-radius:10px;background:rgba(0,0,0,0.3);font-size:1.7rem;cursor:pointer;transition:all .15s;}
-.suit-btn:hover{background:rgba(201,168,76,0.15);border-color:var(--gold);transform:scale(1.06);}
-.suit-btn.red-s{color:#e74c3c;}.suit-btn.blk-s{color:#eee;}
-.sc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:.9rem;}
-.sc-row .v{color:var(--gold);font-weight:600;}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.88);border:1px solid var(--gold-dim);color:var(--cream);padding:9px 20px;border-radius:20px;font-size:.88rem;z-index:200;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;}
+.modal-box{background:linear-gradient(160deg,#1a2a3a,#0a1520);border:1px solid rgba(240,192,64,0.3);border-radius:18px;padding:24px;max-width:340px;width:92%;text-align:center;}
+.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.4rem;margin-bottom:8px;}
+.modal-box p{color:rgba(255,255,255,0.6);font-size:.88rem;margin-bottom:16px;font-style:italic;}
+.suit-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sp-btn{padding:14px;border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;background:rgba(0,0,0,0.3);font-size:1.8rem;cursor:pointer;transition:all .15s;}
+.sp-btn:hover{background:rgba(240,192,64,0.15);border-color:var(--gold);transform:scale(1.06);}
+.sp-btn.r{color:#e74c3c;}.sp-btn.b{color:#eee;}
+
+/* Round summary */
+.summary-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:.88rem;}
+.summary-row:last-child{border-bottom:none;}
+.summary-val{font-weight:700;}
+.summary-val.ta{color:var(--teamA);}.summary-val.tb{color:var(--teamB);}.summary-val.none{color:rgba(255,255,255,0.35);}
+.summary-total{margin-top:12px;font-family:'Playfair Display',serif;font-size:1rem;color:rgba(255,255,255,0.8);}
+
+/* Toast */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);border:1px solid rgba(240,192,64,0.4);color:#fff;padding:8px 18px;border-radius:20px;font-size:.85rem;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center;}
 .toast.show{opacity:1;}
 .dot{display:inline-block;animation:blink 1.4s infinite;}
 .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+
+/* Responsive: bigger phones */
+@media(min-width:400px){
+  :root{--card-w:78px;--card-h:112px;}
+  .card.small{width:64px;height:90px;}
+}
+@media(min-width:600px){
+  :root{--card-w:85px;--card-h:122px;}
+  .card.small{width:72px;height:100px;}
+  .kick-card{width:80px;height:114px;}
+}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- LOBBY -->
+<!-- ══ LOBBY ══ -->
 <div class="screen active" id="lobbyScreen">
-  <div class="suits-row">♠ ♥ ♦ ♣</div>
-  <div class="logo">All <em>Fours</em></div>
-  <div class="tagline">Trinidad · Four Player · Partners</div>
-  <div class="panel">
-    <input id="playerName" placeholder="Your name" maxlength="14"/>
-    <button class="btn btn-gold" onclick="createRoom()">🃏 Create Game</button>
-    <div class="divider">or join with a code</div>
-    <input id="joinCode" class="big-code" placeholder="CODE" maxlength="4"/>
-    <button class="btn btn-ghost" onclick="joinRoom()">Join Game</button>
+  <div class="lobby-logo">All Fours</div>
+  <div class="lobby-sub">Trinidad · Four Player · Partners</div>
+  <div class="lobby-panel">
+    <input class="l-input" id="playerName" placeholder="Your name" maxlength="14"/>
+    <button class="l-btn primary" onclick="createRoom()">🃏 Create Game</button>
+    <div class="divider">— or join with a code —</div>
+    <input class="l-input code" id="joinCode" placeholder="CODE" maxlength="4"/>
+    <button class="l-btn ghost" onclick="joinRoom()">Join Game</button>
   </div>
 </div>
 
-<!-- WAITING -->
+<!-- ══ WAITING ══ -->
 <div class="screen" id="waitingScreen">
-  <div class="logo" style="font-size:2.4rem">Waiting<em>...</em></div>
-  <div class="code-box" style="width:100%;max-width:360px">
-    <div class="code-label">Room Code — share with friends</div>
+  <div class="lobby-logo" style="font-size:2rem">Waiting...</div>
+  <div class="code-display">
+    <div class="code-hint">Room Code — share with friends</div>
     <div class="code-big" id="displayCode">----</div>
-    <div class="code-label" style="margin-top:4px;cursor:pointer" onclick="copyCode()">tap to copy</div>
+    <div class="code-hint" onclick="copyCode()">tap to copy</div>
   </div>
-  <div style="width:100%;max-width:380px">
-    <div class="player-slots" id="playerSlots"></div>
-    <div id="teamAssign" style="display:none">
-      <p style="text-align:center;font-style:italic;font-size:.85rem;color:rgba(245,237,214,0.5);margin-bottom:10px;">Assign teams then start</p>
-      <div class="team-grid">
-        <div class="team-col ta"><h4>⚔ Team A</h4><div id="teamAList"></div></div>
-        <div class="team-col tb"><h4>🛡 Team B</h4><div id="teamBList"></div></div>
-      </div>
-      <button class="btn btn-gold" id="startBtn" onclick="startGame()" style="margin-top:12px;" disabled>Start Game</button>
+  <div class="p-slots" id="playerSlots"></div>
+  <div id="teamAssign" style="display:none;width:100%;max-width:360px;">
+    <p style="text-align:center;font-size:.82rem;color:rgba(255,255,255,0.4);margin-bottom:10px;font-style:italic;">Drag players into teams then start</p>
+    <div class="team-grid">
+      <div class="team-col ta"><h4>⚔ Team A</h4><div id="teamAList"></div></div>
+      <div class="team-col tb"><h4>🛡 Team B</h4><div id="teamBList"></div></div>
     </div>
-    <p id="waitMsg" style="text-align:center;color:rgba(245,237,214,0.45);font-style:italic;margin-top:16px;font-size:.88rem;">
-      Waiting for players<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
-    </p>
+    <button class="l-btn primary" id="startBtn" onclick="startGame()" style="margin-top:12px;max-width:360px;" disabled>Start Game</button>
   </div>
+  <p id="waitMsg" style="color:rgba(255,255,255,0.35);font-size:.85rem;margin-top:14px;font-style:italic;">
+    Waiting<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+  </p>
 </div>
 
-<!-- GAME TABLE -->
+<!-- ══ GAME TABLE ══ -->
 <div class="screen" id="gameScreen">
+
+  <!-- Score Header -->
   <div class="g-header">
-    <div class="score-badge">⚔ A: <span class="pts" id="scoreA">0</span></div>
-    <div class="trump-badge">Trump <span class="trump-suit" id="trumpDisp">—</span></div>
-    <div class="score-badge">🛡 B: <span class="pts" id="scoreB">0</span></div>
+    <div class="team-score left">
+      <div class="ts-label">Team A</div>
+      <div class="ts-pts ta" id="scoreA">0</div>
+      <div class="ts-game">Game: <span id="gameA">0</span></div>
+    </div>
+    <div class="header-center">
+      <div class="trump-icon" id="trumpIcon">🂠</div>
+      <div class="trump-count" id="trumpCount">Trump</div>
+    </div>
+    <div class="team-score right">
+      <div class="ts-label">Team B</div>
+      <div class="ts-pts tb" id="scoreB">0</div>
+      <div class="ts-game">Game: <span id="gameB">0</span></div>
+    </div>
   </div>
+
+  <!-- Top opponent -->
   <div class="opp-top" id="oppTop"></div>
-  <div class="side-players">
+
+  <!-- Middle: left | center | right -->
+  <div class="mid-row">
     <div class="side-opp" id="leftOpp"></div>
-    <div class="center-area" style="flex:1;max-width:340px;">
-      <div class="status-pill" id="statusBar">Loading...</div>
-      <div class="trick-table" id="trickTable"></div>
-      <div class="kick-display" id="kickDisplay" style="display:none"></div>
+
+    <div class="center-table">
+      <div class="status-bar" id="statusBar">Loading...</div>
+
+      <!-- Kick card -->
+      <div class="kick-area" id="kickArea" style="display:none">
+        <div class="kick-label">Trump Kicked</div>
+        <div id="kickCardEl"></div>
+        <div id="kickBonusTag"></div>
+      </div>
+
+      <!-- Trick grid -->
+      <div class="trick-grid" id="trickGrid"></div>
+
       <div class="action-row" id="actionRow"></div>
     </div>
+
     <div class="side-opp" id="rightOpp"></div>
   </div>
-  <div class="my-area">
-    <div class="p-label" id="myLabel">Your Hand</div>
-    <div class="my-hand" id="myHand"></div>
+
+  <!-- Bottom toolbar -->
+  <div class="bottom-bar">
+    <div class="suit-btns">
+      <button class="suit-filter blk-s" onclick="sortBySuit('♠')" title="Sort Spades">♠</button>
+      <button class="suit-filter red-s" onclick="sortBySuit('♥')" title="Sort Hearts">♥</button>
+      <button class="suit-filter blk-s" onclick="sortBySuit('♣')" title="Sort Clubs">♣</button>
+      <button class="suit-filter red-s" onclick="sortBySuit('♦')" title="Sort Diamonds">♦</button>
+      <button class="sort-btn" onclick="sortByRank()" title="Sort by Rank">↕</button>
+      <button class="sort-btn" onclick="sortTrumpFirst()" title="Trump First">🏆</button>
+    </div>
+    <div class="game-counter">
+      <span class="gc-label">Games</span>
+      <span class="gc-val ta" id="gcA">0</span>
+      <span class="gc-label">vs</span>
+      <span class="gc-val tb" id="gcB">0</span>
+    </div>
+  </div>
+
+  <!-- My hand -->
+  <div class="hand-area">
+    <div class="my-label" id="myLabel">Your Hand</div>
+    <div class="hand-scroll" id="myHand"></div>
+  </div>
+
+</div>
+</div><!-- #app -->
+
+<!-- Round Summary Modal -->
+<div class="modal" id="summaryModal">
+  <div class="modal-box">
+    <h3 id="summaryTitle">Round Over</h3>
+    <div id="summaryRows" style="margin:12px 0;text-align:left;"></div>
+    <div class="summary-total" id="summaryTotal"></div>
+    <button class="act-btn gold" style="margin-top:16px;width:100%;padding:12px;" id="nextBtn" onclick="nextRound()">Next Round →</button>
   </div>
 </div>
 
-</div>
-
-<!-- Result Modal -->
-<div class="modal" id="resultModal">
+<!-- Game Over Modal -->
+<div class="modal" id="gameOverModal">
   <div class="modal-box">
-    <h2 id="resultTitle" style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.7rem;margin-bottom:14px;"></h2>
-    <div id="scoreBD"></div>
-    <div id="totalLine" style="margin-top:12px;font-family:'Playfair Display',serif;font-size:1rem;"></div>
-    <button class="act-btn gold" style="margin-top:18px;width:100%;padding:12px;" id="nextBtn" onclick="nextRound()">Next Round →</button>
+    <h3 id="gameOverTitle">Game Over!</h3>
+    <p id="gameOverSub"></p>
+    <div id="gameOverRows" style="margin:12px 0;text-align:left;"></div>
+    <button class="act-btn gold" style="margin-top:16px;width:100%;padding:12px;" onclick="resetGame()">Play Again</button>
   </div>
 </div>
 
@@ -207,18 +353,21 @@ const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const RANK_VAL = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,J:11,Q:12,K:13,A:14};
 const SUIT_COLOR = {'♠':'black','♣':'black','♥':'red','♦':'red'};
+const SUIT_ORDER = {'♠':0,'♥':1,'♦':2,'♣':3};
 const ROLES = ['p0','p1','p2','p3'];
 
 let ws, myRole, myName, roomCode;
 let state = null;
+let localHandOrder = null; // local sort override
 
+// ── Utils
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 function makeDeck(){const d=[];SUITS.forEach(s=>RANKS.forEach(r=>d.push({suit:s,rank:r})));return d;}
-function cardVal(c){return({A:4,K:3,Q:2,J:1,10:10}[c.rank])||0;}
-function rankCard(c,trump,led){if(c.suit===trump)return 100+RANK_VAL[c.rank];if(c.suit===led)return RANK_VAL[c.rank];return 0;}
-function teamOf(role,teams){if(!teams)return null;if((teams.A||[]).includes(role))return'A';if((teams.B||[]).includes(role))return'B';return null;}
+function cardGameVal(c){return({A:4,K:3,Q:2,J:1,10:10}[c.rank])||0;}
+function rankTrick(c,trump,led){if(c.suit===trump)return 100+RANK_VAL[c.rank];if(c.suit===led)return RANK_VAL[c.rank];return 0;}
+function teamOf(r,teams){if(!teams)return null;if((teams.A||[]).includes(r))return'A';if((teams.B||[]).includes(r))return'B';return null;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
 function copyCode(){navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied!')).catch(()=>{});}
 
 // ── WebSocket
@@ -226,8 +375,8 @@ function connect(cb){
   ws=new WebSocket(SERVER);
   ws.onopen=cb;
   ws.onmessage=e=>handleMsg(JSON.parse(e.data));
-  ws.onerror=()=>toast('Connection error');
-  ws.onclose=()=>{if(state)toast('Disconnected — refresh to rejoin',4000);};
+  ws.onerror=()=>toast('Connection error — check your internet');
+  ws.onclose=()=>{if(state&&state.phase!=='lobby')toast('Disconnected — refresh to rejoin',4000);};
 }
 function send(obj){if(ws&&ws.readyState===1)ws.send(JSON.stringify(obj));}
 
@@ -237,9 +386,11 @@ function handleMsg(msg){
     case 'joined':  myRole=msg.role; state=msg.state; showScreen('waitingScreen'); renderWaiting(); break;
     case 'lobby_update': state=msg.state; renderWaiting(); break;
     case 'state':
+      const wasPhase = state ? state.phase : null;
       state=msg.state; myRole=state.myRole||myRole;
-      if(state.phase==='lobby'||state.phase==='team_select'){showScreen('waitingScreen');renderWaiting();}
-      else{showScreen('gameScreen');renderGame();handlePhaseUI();}
+      localHandOrder = null; // reset sort on new state
+      if(['lobby','team_select','waiting'].includes(state.phase)){showScreen('waitingScreen');renderWaiting();}
+      else{showScreen('gameScreen');renderGame();handlePhaseUI(wasPhase);}
       break;
     case 'player_left': toast('A player disconnected 😢',4000); break;
     case 'error': toast(msg.msg); break;
@@ -263,49 +414,35 @@ function renderWaiting(){
   document.getElementById('displayCode').textContent=roomCode||'----';
   document.getElementById('playerSlots').innerHTML=ROLES.map((r,i)=>{
     const name=state[r]; const team=state.teams?teamOf(r,state.teams):null;
-    const tl=team?`<div class="slot-team team-${team.toLowerCase()}">Team ${team}</div>`:'';
-    return `<div class="player-slot ${name?'filled':''}">
-      <div class="slot-num">Player ${i+1}</div>
-      ${name?`<div class="slot-name">${name}</div>${tl}`:'<div style="color:rgba(245,237,214,0.25);font-size:.82rem;">Empty</div>'}
+    const tl=team?`<div class="slot-team ${team==='A'?'ta':'tb'}">Team ${team}</div>`:'';
+    return`<div class="p-slot ${name?'filled':''}">
+      <div class="slot-n">P${i+1}</div>
+      ${name?`<div class="slot-name">${name}</div>${tl}`:'<div style="color:rgba(255,255,255,0.2);font-size:.8rem;">Empty</div>'}
     </div>`;
   }).join('');
-
-  const allJoined=state.playerCount===4;
-  const isHost=myRole==='p0';
-  const waitMsg=document.getElementById('waitMsg');
-  const teamDiv=document.getElementById('teamAssign');
-
-  if(allJoined&&isHost){
-    teamDiv.style.display='block'; waitMsg.style.display='none'; renderTeamAssign();
-  } else if(allJoined&&!isHost){
-    teamDiv.style.display='none'; waitMsg.style.display='block';
-    waitMsg.innerHTML='Host is setting up teams<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
-  } else {
-    teamDiv.style.display='none'; waitMsg.style.display='block';
-    waitMsg.innerHTML=`${state.playerCount}/4 players joined<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>`;
-  }
+  const all=state.playerCount===4, isHost=myRole==='p0';
+  const ta=document.getElementById('teamAssign'), wm=document.getElementById('waitMsg');
+  if(all&&isHost){ta.style.display='block';wm.style.display='none';renderTeamAssign();}
+  else if(all&&!isHost){ta.style.display='none';wm.style.display='block';wm.innerHTML='Host is setting up teams<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';}
+  else{ta.style.display='none';wm.style.display='block';wm.innerHTML=`${state.playerCount}/4 players joined<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>`;}
 }
-
 function renderTeamAssign(){
-  if(!state.teams) state.teams={A:['p0','p2'],B:['p1','p3']};
-  const ml=(tk)=>state.teams[tk].map(r=>{
+  if(!state.teams)state.teams={A:['p0','p2'],B:['p1','p3']};
+  const ml=tk=>state.teams[tk].map(r=>{
     const other=tk==='A'?'B':'A';
-    return `<div class="assign-row"><span class="assign-name">${state[r]||r}</span>
-      <button class="assign-btn to-${other.toLowerCase()}" onclick="moveToTeam('${r}','${other}')">→ ${other}</button></div>`;
+    return`<div class="a-row"><span class="a-name">${state[r]||r}</span><button class="a-btn to-${other.toLowerCase()}" onclick="moveToTeam('${r}','${other}')">→${other}</button></div>`;
   }).join('');
   document.getElementById('teamAList').innerHTML=ml('A');
   document.getElementById('teamBList').innerHTML=ml('B');
   document.getElementById('startBtn').disabled=!(state.teams.A.length===2&&state.teams.B.length===2);
 }
-
-function moveToTeam(role,toTeam){
-  const from=toTeam==='A'?'B':'A';
+function moveToTeam(role,to){
+  const from=to==='A'?'B':'A';
   state.teams[from]=state.teams[from].filter(r=>r!==role);
-  state.teams[toTeam].push(role);
+  state.teams[to].push(role);
   renderTeamAssign();
   send({type:'update_lobby',state});
 }
-
 function startGame(){
   if(!state.teams||state.teams.A.length!==2||state.teams.B.length!==2){toast('Each team needs 2 players');return;}
   dealRound();
@@ -316,13 +453,17 @@ function dealRound(){
   const deck=shuffle(makeDeck());
   state.hands={p0:deck.slice(0,6),p1:deck.slice(6,12),p2:deck.slice(12,18),p3:deck.slice(18,24)};
   state.remainingDeck=deck.slice(24);
-  const kickCard=state.remainingDeck.shift();
-  state.kickCard=kickCard;
-  state.trumpSuit=kickCard.suit;
-  state.kickBonuses=calcKickBonuses(kickCard,state.dealer,state.teams);
+  const kick=state.remainingDeck.shift();
+  state.kickCard=kick; state.trumpSuit=kick.suit;
 
-  const allCards=ROLES.flatMap(r=>state.hands[r]);
-  const trumps=allCards.filter(c=>c.suit===state.trumpSuit);
+  // Kick bonuses — applied immediately to score
+  const bonuses=calcKickBonuses(kick,state.dealer,state.teams);
+  state.kickBonuses=bonuses;
+  bonuses.forEach(b=>{ state.scores[b.team]=(state.scores[b.team]||0)+b.pts; });
+
+  // Track highest/lowest trump holders
+  const allC=ROLES.flatMap(r=>state.hands[r]);
+  const trumps=allC.filter(c=>c.suit===state.trumpSuit);
   state.highTrumpHolder=null; state.lowTrumpHolder=null;
   if(trumps.length>0){
     const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
@@ -339,8 +480,7 @@ function dealRound(){
   state.ledSuit=null; state.jackCaptured=null;
   state.gamePoints={p0:0,p1:0,p2:0,p3:0};
   state.betStatus=null; state.bettor=null; state.trickCount=0;
-  state.roundPts=null; state.roundBreakdown=null;
-  state.round=(state.round||0)+1;
+  state.roundSummary=null; state.round=(state.round||0)+1;
   const di=ROLES.indexOf(state.dealer);
   state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
@@ -351,7 +491,7 @@ function calcKickBonuses(card,dealerRole,teams){
   if(card.rank==='A') bonuses.push({pts:1,team:dt,reason:'Ace kicked'});
   if(card.rank==='6') bonuses.push({pts:2,team:dt,reason:'Six kicked'});
   if(card.rank==='J'&&card.suit!=='♦') bonuses.push({pts:1,team:dt,reason:'Jack kicked'});
-  if(card.rank==='J'&&card.suit==='♦') bonuses.push({pts:4,team:dt,reason:'Jack of Diamonds kicked!'});
+  if(card.rank==='J'&&card.suit==='♦') bonuses.push({pts:4,team:dt,reason:'J♦ kicked!'});
   return bonuses;
 }
 
@@ -359,15 +499,18 @@ function runThePack(){
   ROLES.forEach(r=>{state.hands[r]=[...state.hands[r],...state.remainingDeck.splice(0,3)];});
   let kick=state.remainingDeck.shift();
   while(kick&&kick.suit===state.trumpSuit&&state.remainingDeck.length>0){
-    state.hands[state.dealer]=[...state.hands[state.dealer],kick];
+    state.hands[state.dealer]=[...(state.hands[state.dealer]||[]),kick];
     kick=state.remainingDeck.shift();
   }
   if(!kick){toast('Deck exhausted — redealing');dealRound();return;}
   state.kickCard=kick; state.trumpSuit=kick.suit;
-  state.kickBonuses=[...(state.kickBonuses||[]),...calcKickBonuses(kick,state.dealer,state.teams)];
 
-  const allCards=ROLES.flatMap(r=>state.hands[r]);
-  const trumps=allCards.filter(c=>c.suit===state.trumpSuit);
+  const newBonuses=calcKickBonuses(kick,state.dealer,state.teams);
+  state.kickBonuses=[...(state.kickBonuses||[]),...newBonuses];
+  newBonuses.forEach(b=>{ state.scores[b.team]=(state.scores[b.team]||0)+b.pts; });
+
+  const allC=ROLES.flatMap(r=>state.hands[r]);
+  const trumps=allC.filter(c=>c.suit===state.trumpSuit);
   if(trumps.length>0){
     const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
     const lt=trumps.reduce((a,b)=>RANK_VAL[a.rank]<RANK_VAL[b.rank]?a:b);
@@ -381,108 +524,165 @@ function runThePack(){
   send({type:'update',state});
 }
 
-// ── Render Game
+// ── Sort functions
+function sortBySuit(suit){
+  if(!state||!state.hands||!state.hands[myRole]) return;
+  const hand=[...state.hands[myRole]];
+  localHandOrder=[...hand].sort((a,b)=>{
+    if(a.suit===suit&&b.suit!==suit)return -1;
+    if(b.suit===suit&&a.suit!==suit)return 1;
+    if(a.suit!==b.suit)return SUIT_ORDER[a.suit]-SUIT_ORDER[b.suit];
+    return RANK_VAL[b.rank]-RANK_VAL[a.rank];
+  });
+  renderHand();
+}
+function sortByRank(){
+  if(!state||!state.hands||!state.hands[myRole]) return;
+  localHandOrder=[...state.hands[myRole]].sort((a,b)=>RANK_VAL[b.rank]-RANK_VAL[a.rank]);
+  renderHand();
+}
+function sortTrumpFirst(){
+  if(!state||!state.hands||!state.hands[myRole]) return;
+  const trump=state.trumpSuit;
+  localHandOrder=[...state.hands[myRole]].sort((a,b)=>{
+    if(a.suit===trump&&b.suit!==trump)return -1;
+    if(b.suit===trump&&a.suit!==trump)return 1;
+    if(a.suit!==b.suit)return SUIT_ORDER[a.suit]-SUIT_ORDER[b.suit];
+    return RANK_VAL[b.rank]-RANK_VAL[a.rank];
+  });
+  renderHand();
+}
+
+// ── Render
 function renderGame(){
   if(!state)return;
   const me=myRole;
   const myIdx=ROLES.indexOf(me);
-  const rightRole=ROLES[(myIdx+1)%4];
-  const topRole=ROLES[(myIdx+2)%4];
-  const leftRole=ROLES[(myIdx+3)%4];
+  const rR=ROLES[(myIdx+1)%4], tR=ROLES[(myIdx+2)%4], lR=ROLES[(myIdx+3)%4];
 
-  document.getElementById('scoreA').textContent=state.scores.A;
-  document.getElementById('scoreB').textContent=state.scores.B;
+  // Scores
+  document.getElementById('scoreA').textContent=state.scores.A||0;
+  document.getElementById('scoreB').textContent=state.scores.B||0;
+  document.getElementById('gameA').textContent=state.gamesWon?state.gamesWon.A||0:0;
+  document.getElementById('gameB').textContent=state.gamesWon?state.gamesWon.B||0:0;
+  document.getElementById('gcA').textContent=state.gamesWon?state.gamesWon.A||0:0;
+  document.getElementById('gcB').textContent=state.gamesWon?state.gamesWon.B||0:0;
+
+  // Trump
   const ts=state.trumpSuit;
-  const td=document.getElementById('trumpDisp');
-  td.textContent=ts||'—';
-  td.style.color=ts?(SUIT_COLOR[ts]==='red'?'#e74c3c':'#eee'):'';
+  document.getElementById('trumpIcon').textContent=ts||'🂠';
+  document.getElementById('trumpIcon').style.color=ts?(SUIT_COLOR[ts]==='red'?'#e74c3c':'#eee'):'#fff';
+  document.getElementById('trumpCount').textContent=ts?`Trump ${ts}`:'Trump';
 
-  // Top opponent
-  document.getElementById('oppTop').innerHTML=`<div class="opp-top-row"><div class="opp-player">
-    <div class="p-name">${state[topRole]||'?'} <span style="font-size:.65rem;color:${teamOf(topRole,state.teams)==='A'?'#5dade2':'#ec7063'}">Team ${teamOf(topRole,state.teams)||'?'}</span></div>
-    <div class="mini-hand">${(state.hands[topRole]||[]).map(()=>`<div class="card-back-mini"></div>`).join('')}</div>
-  </div></div>`;
+  // Top opp
+  const isTopTurn=state.turn===tR;
+  document.getElementById('oppTop').innerHTML=`<div class="opp-box">
+    <div class="opp-avatar ${isTopTurn?'turn':''}">🎭</div>
+    <div class="opp-name">${state[tR]||'?'} <span style="font-size:.6rem;color:${teamOf(tR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">T${teamOf(tR,state.teams)||'?'}</span></div>
+    <div class="opp-cards">${(state.hands[tR]||[]).map(()=>`<div class="mini-card"></div>`).join('')}</div>
+  </div>`;
 
   // Side opps
+  const isLTurn=state.turn===lR, isRTurn=state.turn===rR;
   document.getElementById('leftOpp').innerHTML=`
-    <div class="p-name" style="font-size:.65rem;writing-mode:vertical-rl;transform:rotate(180deg);margin-bottom:4px;">${state[leftRole]||'?'}</div>
-    <div class="side-cards">${(state.hands[leftRole]||[]).map(()=>`<div class="card-back-side"></div>`).join('')}</div>`;
+    <div class="opp-avatar ${isLTurn?'turn':''}" style="width:32px;height:32px;font-size:1rem;">🎭</div>
+    <div class="side-name" style="color:${teamOf(lR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[lR]||'?'}</div>
+    <div class="side-cards-v">${(state.hands[lR]||[]).map(()=>`<div class="mini-card-h"></div>`).join('')}</div>`;
   document.getElementById('rightOpp').innerHTML=`
-    <div class="p-name" style="font-size:.65rem;writing-mode:vertical-rl;margin-bottom:4px;">${state[rightRole]||'?'}</div>
-    <div class="side-cards">${(state.hands[rightRole]||[]).map(()=>`<div class="card-back-side"></div>`).join('')}</div>`;
+    <div class="opp-avatar ${isRTurn?'turn':''}" style="width:32px;height:32px;font-size:1rem;">🎭</div>
+    <div class="side-name" style="color:${teamOf(rR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[rR]||'?'}</div>
+    <div class="side-cards-v">${(state.hands[rR]||[]).map(()=>`<div class="mini-card-h"></div>`).join('')}</div>`;
 
-  // Trick table
-  document.getElementById('trickTable').innerHTML=`
-    <div></div><div class="trick-slot">${trickSlot(topRole)}</div><div></div>
-    <div class="trick-slot">${trickSlot(leftRole)}</div>
-    <div class="trick-center">⚔</div>
-    <div class="trick-slot">${trickSlot(rightRole)}</div>
-    <div></div><div class="trick-slot">${trickSlot(me)}</div><div></div>`;
-
-  // Kick display
-  const kd=document.getElementById('kickDisplay');
+  // Kick card
+  const ka=document.getElementById('kickArea');
   if(state.kickCard&&state.phase!=='lobby'){
-    kd.style.display='block';
+    ka.style.display='flex';
+    document.getElementById('kickCardEl').innerHTML=buildCardHtml(state.kickCard,'kick-card');
+    const bTag=document.getElementById('kickBonusTag');
     const bonusText=(state.kickBonuses||[]).map(b=>`+${b.pts} Team ${b.team}: ${b.reason}`).join(' · ');
-    kd.innerHTML=`<div class="kick-label">Trump Kicked</div>${smallCardHtml(state.kickCard)}${bonusText?`<div class="kick-bonuses">${bonusText}</div>`:''}`;
-  } else kd.style.display='none';
+    bTag.innerHTML=bonusText?`<div class="kick-bonus-tag">${bonusText}</div>`:'';
+  } else ka.style.display='none';
+
+  // Trick grid
+  renderTrickGrid(me, tR, lR, rR);
+
+  // Status + actions
+  renderStatus(); renderActions();
 
   // My hand
   document.getElementById('myLabel').textContent=`${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}`;
-  const myCards=(state.hands&&state.hands[me])||[];
+  renderHand();
+}
+
+function renderHand(){
+  if(!state||!state.hands) return;
+  const myCards=localHandOrder||state.hands[myRole]||[];
+  const realHand=state.hands[myRole]||[];
   const canPlay=isMyTurn()&&state.phase==='playing';
   document.getElementById('myHand').innerHTML=myCards.map((c,i)=>{
     if(c.hidden)return'';
-    const ok=canPlay&&canPlayCard(c,myCards);
-    return`<div class="card ${SUIT_COLOR[c.suit]} ${ok?'playable':''} ${ts&&c.suit===ts?'trump-card':''}" onclick="${ok?`playCard(${i})`:''}">\
-      <div><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>\
+    // Find index in real hand for playCard
+    const realIdx=realHand.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
+    const ok=canPlay&&canPlayCard(c,realHand);
+    const isTrump=state.trumpSuit&&c.suit===state.trumpSuit;
+    return`<div class="card ${SUIT_COLOR[c.suit]} ${ok?'playable':''} ${isTrump?'trump-c':''}" onclick="${ok?`playCard(${realIdx})`:''}">\
+      <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>\
       <div class="c-mid">${c.suit}</div>\
       <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
   }).join('');
-
-  renderStatus(); renderActions();
 }
 
-function trickSlot(role){
-  const c=state&&state.trickCard&&state.trickCard[role];
-  const nm=state&&state[role]?state[role].split(' ')[0]:'';
-  if(!c)return`<div class="trick-slot-label">${nm}</div><div style="width:48px;height:68px;border-radius:6px;border:1px dashed rgba(255,255,255,0.1);"></div>`;
-  return`<div class="trick-slot-label">${nm}</div>${smallCardHtml(c)}`;
+function renderTrickGrid(me,tR,lR,rR){
+  const tg=document.getElementById('trickGrid');
+  const slot=(role,label)=>{
+    const c=state.trickCard&&state.trickCard[role];
+    const nm=label||state[role]||'';
+    if(!c)return`<div class="t-slot"><div class="t-name">${nm}</div><div class="t-slot-empty"></div></div>`;
+    return`<div class="t-slot"><div class="t-name">${nm}</div>${buildCardHtml(c,'small')}</div>`;
+  };
+  tg.innerHTML=`
+    <div></div>${slot(tR,state[tR]||'')}<div></div>
+    ${slot(lR,state[lR]||'')}<div class="t-center">⚔</div>${slot(rR,state[rR]||'')}
+    <div></div>${slot(me,'You')}<div></div>`;
 }
 
-function smallCardHtml(c){
+function buildCardHtml(c,extraClass=''){
   if(!c||c.hidden)return'';
   const col=SUIT_COLOR[c.suit];
-  return`<div class="card ${col}" style="width:48px;height:68px;cursor:default;font-size:.8rem;">\
-    <div><div class="c-rank" style="font-size:.75rem">${c.rank}</div><div class="c-suit" style="font-size:.7rem">${c.suit}</div></div>\
-    <div class="c-mid" style="font-size:1.1rem">${c.suit}</div>\
-    <div class="c-bot"><div class="c-rank" style="font-size:.75rem">${c.rank}</div><div class="c-suit" style="font-size:.7rem">${c.suit}</div></div></div>`;
+  return`<div class="card ${col} ${extraClass}">\
+    <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>\
+    <div class="c-mid">${c.suit}</div>\
+    <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
 }
 
 function isMyTurn(){return state&&state.turn===myRole;}
 
 function renderStatus(){
   const bar=document.getElementById('statusBar');
-  const ph=state.phase; const mt=isMyTurn();
-  const turnName=state[state.turn]||'?';
-  if(ph==='bet'){bar.textContent=mt?'Bet or Stand?':`Waiting for ${turnName} to bet or stand...`;return;}
-  if(ph==='dealer_choice'){bar.textContent=state.turn===myRole?'Give or Run the Pack?':`${turnName} (dealer) deciding...`;return;}
+  const ph=state.phase, mt=isMyTurn(), tn=state[state.turn]||'?';
+  if(ph==='bet'){bar.textContent=mt?'Your turn — Bet or Stand?':`${tn} deciding to bet or stand...`;return;}
+  if(ph==='dealer_choice'){bar.textContent=state.turn===myRole?'Give or Run the Pack?':`${tn} (dealer) deciding...`;return;}
   if(ph==='playing'){
-    const tw=state.trickWins; const mt2=teamOf(myRole,state.teams);
-    const tt=(state.teams&&state.teams[mt2]||[]).reduce((s,r)=>s+(tw[r]||0),0);
-    bar.textContent=mt?`Your turn — Team ${mt2}: ${tt} tricks`:`${turnName}'s turn...`;return;
+    const myT=teamOf(myRole,state.teams);
+    const tt=(state.teams&&state.teams[myT]||[]).reduce((s,r)=>s+(state.trickWins[r]||0),0);
+    bar.textContent=mt?`Your turn — Team ${myT} has ${tt} tricks`:`${tn}'s turn...`;return;
   }
-  if(ph==='round_end'){bar.textContent='Round complete!';return;}
+  if(ph==='round_end')bar.textContent='Round complete!';
   if(ph==='game_over'){const w=state.scores.A>=14?'A':'B';bar.textContent=`Game over! Team ${w} wins! 🎉`;}
 }
 
 function renderActions(){
   const row=document.getElementById('actionRow'); row.innerHTML='';
   if(state.phase==='bet'&&isMyTurn()){
-    row.innerHTML=`<button class="act-btn gold" onclick="doBet()">💰 Bet</button><button class="act-btn danger" onclick="doStand()">Stand</button>`;
+    row.innerHTML=`<button class="act-btn gold" onclick="doBet()">💰 Bet</button><button class="act-btn red" onclick="doStand()">Stand</button>`;
   } else if(state.phase==='dealer_choice'&&state.turn===myRole){
     row.innerHTML=`<button class="act-btn blue" onclick="doGive()">Give (+1 to bettor)</button><button class="act-btn gold" onclick="doRunPack()">Run the Pack 🃏</button>`;
   }
+}
+
+function handlePhaseUI(wasPhase){
+  if(state.phase==='round_end') showSummary();
+  if(state.phase==='game_over') showGameOver();
 }
 
 // ── Bet Phase
@@ -503,7 +703,7 @@ function doGive(){
   if(state.turn!==myRole)return;
   const bt=teamOf(state.bettor,state.teams);
   state.scores[bt]=(state.scores[bt]||0)+1;
-  toast(`+1 to Team ${bt} (Give)`);
+  toast(`+1 to Team ${bt} — Give!`);
   state.phase='playing';
   const di=ROLES.indexOf(state.dealer);
   state.turn=ROLES[(di+1)%4];
@@ -511,9 +711,9 @@ function doGive(){
 }
 function doRunPack(){if(state.turn!==myRole)return; runThePack();}
 
-// ── Playing Phase
+// ── Playing
 function canPlayCard(card,hand){
-  const trump=state.trumpSuit; const led=state.ledSuit;
+  const trump=state.trumpSuit, led=state.ledSuit;
   if(!led)return true;
   const hasSuit=hand.some(c=>!c.hidden&&c.suit===led&&c.suit!==trump);
   if(hasSuit)return card.suit===led;
@@ -525,25 +725,24 @@ function playCard(idx){
   const card=hand[idx];
   if(!card||card.hidden)return;
   if(!canPlayCard(card,hand)){toast('You must follow suit!');return;}
-  hand.splice(idx,1);
-  state.hands[myRole]=hand;
+  hand.splice(idx,1); state.hands[myRole]=hand;
   state.trickCard[myRole]=card;
   if(!state.ledSuit)state.ledSuit=card.suit;
+  localHandOrder=null;
   const allPlayed=ROLES.every(r=>state.trickCard[r]!==null);
-  if(allPlayed){resolveTrick();}
+  if(allPlayed)resolveTrick();
   else{const i2=ROLES.indexOf(myRole);state.turn=ROLES[(i2+1)%4];send({type:'update',state});}
 }
 
 function resolveTrick(){
-  const trump=state.trumpSuit; const led=state.ledSuit;
-  let best=null,winner=null;
-  ROLES.forEach(r=>{const c=state.trickCard[r];const v=rankCard(c,trump,led);if(best===null||v>best){best=v;winner=r;}});
+  const trump=state.trumpSuit, led=state.ledSuit;
+  let best=null, winner=null;
+  ROLES.forEach(r=>{const v=rankTrick(state.trickCard[r],trump,led);if(best===null||v>best){best=v;winner=r;}});
   state.trickWins[winner]++;
   state.trickCount++;
   ROLES.forEach(r=>{const c=state.trickCard[r];if(c.rank==='J'&&c.suit===trump)state.jackCaptured=winner;});
-  ROLES.forEach(r=>{state.gamePoints[r]=(state.gamePoints[r]||0)+cardVal(state.trickCard[r]);});
-  state.trickCard={p0:null,p1:null,p2:null,p3:null};
-  state.ledSuit=null;
+  ROLES.forEach(r=>{state.gamePoints[r]=(state.gamePoints[r]||0)+cardGameVal(state.trickCard[r]);});
+  state.trickCard={p0:null,p1:null,p2:null,p3:null}; state.ledSuit=null;
   const done=ROLES.every(r=>(state.hands[r]||[]).length===0);
   if(done)scoreRound();
   else{state.turn=winner;send({type:'update',state});}
@@ -551,38 +750,97 @@ function resolveTrick(){
 
 // ── Scoring
 function scoreRound(){
-  const rp={A:0,B:0}; const bd=[];
-  (state.kickBonuses||[]).forEach(b=>{rp[b.team]+=b.pts;bd.push({label:b.reason,val:`+${b.pts} Team ${b.team}`});});
-  if(state.highTrumpHolder){const t=teamOf(state.highTrumpHolder,state.teams);rp[t]++;bd.push({label:'🏆 Highest Trump',val:`+1 Team ${t}`});}
-  if(state.lowTrumpHolder){const t=teamOf(state.lowTrumpHolder,state.teams);rp[t]++;bd.push({label:'🔻 Lowest Trump',val:`+1 Team ${t}`});}
-  if(state.jackCaptured){const t=teamOf(state.jackCaptured,state.teams);rp[t]++;bd.push({label:'🃏 Hanging Jack',val:`+1 Team ${t}`});}
+  const rp={A:0,B:0}; const summary=[];
+
+  // Kick bonuses already added — display them
+  (state.kickBonuses||[]).forEach(b=>{
+    summary.push({label:b.reason,team:b.team,pts:b.pts,note:'(scored at kick)'});
+  });
+
+  // Highest trump
+  if(state.highTrumpHolder){
+    const t=teamOf(state.highTrumpHolder,state.teams);
+    rp[t]++; summary.push({label:`🏆 Highest Trump`,team:t,pts:1});
+  } else summary.push({label:'🏆 Highest Trump',team:null,pts:0});
+
+  // Lowest trump
+  if(state.lowTrumpHolder){
+    const t=teamOf(state.lowTrumpHolder,state.teams);
+    rp[t]++; summary.push({label:`🔻 Lowest Trump`,team:t,pts:1});
+  } else summary.push({label:'🔻 Lowest Trump',team:null,pts:0});
+
+  // Hanging jack
+  if(state.jackCaptured){
+    const t=teamOf(state.jackCaptured,state.teams);
+    rp[t]++; summary.push({label:`🃏 Hanging Jack`,team:t,pts:1});
+  } else summary.push({label:'🃏 Hanging Jack',team:null,pts:0,note:'Not in play'});
+
+  // Game (2 pts)
   const gpA=(state.teams.A||[]).reduce((s,r)=>s+(state.gamePoints[r]||0),0);
   const gpB=(state.teams.B||[]).reduce((s,r)=>s+(state.gamePoints[r]||0),0);
-  if(gpA!==gpB){const gw=gpA>gpB?'A':'B';rp[gw]+=2;bd.push({label:`🎯 Game (A:${gpA} B:${gpB})`,val:`+2 Team ${gw}`});}
+  if(gpA!==gpB){
+    const gw=gpA>gpB?'A':'B';
+    rp[gw]+=2; summary.push({label:`🎯 Game (A:${gpA} B:${gpB})`,team:gw,pts:2});
+  } else summary.push({label:`🎯 Game (Tied: ${gpA})`,team:null,pts:0});
+
   state.scores.A=(state.scores.A||0)+rp.A;
   state.scores.B=(state.scores.B||0)+rp.B;
-  state.roundPts=rp; state.roundBreakdown=bd;
-  if(state.scores.A>=14||state.scores.B>=14){state.phase='game_over';}
-  else{state.phase='round_end';const di=ROLES.indexOf(state.dealer);state.dealer=ROLES[(di+1)%4];}
+  state.roundSummary=summary; state.roundPts=rp;
+
+  if(!state.gamesWon) state.gamesWon={A:0,B:0};
+
+  if(state.scores.A>=14||state.scores.B>=14){
+    const gw=state.scores.A>=14?'A':'B';
+    state.gamesWon[gw]++;
+    state.phase='game_over';
+  } else {
+    state.phase='round_end';
+    const di=ROLES.indexOf(state.dealer);
+    state.dealer=ROLES[(di+1)%4];
+  }
   send({type:'update',state});
 }
 
-function handlePhaseUI(){
-  if(state.phase==='round_end'||state.phase==='game_over')showResult();
+function showSummary(){
+  const myT=teamOf(myRole,state.teams);
+  const summary=state.roundSummary||[];
+  document.getElementById('summaryTitle').textContent='Round Summary';
+  document.getElementById('summaryRows').innerHTML=summary.map(s=>{
+    const valClass=s.team?`summary-val t${s.team.toLowerCase()}`:'summary-val none';
+    const valText=s.team?`+${s.pts} Team ${s.team} ${s.note||''}`:(s.note||'—');
+    return`<div class="summary-row"><span>${s.label}</span><span class="${valClass}">${valText}</span></div>`;
+  }).join('');
+  document.getElementById('summaryTotal').textContent=`Score — Team A: ${state.scores.A} · Team B: ${state.scores.B} · First to 14`;
+  const nb=document.getElementById('nextBtn');
+  nb.textContent='Next Round →';
+  nb.style.display=myRole===state.dealer?'':'none';
+  document.getElementById('summaryModal').classList.add('open');
 }
-function showResult(){
-  const mt=teamOf(myRole,state.teams);
-  document.getElementById('scoreBD').innerHTML=(state.roundBreakdown||[]).map(b=>`<div class="sc-row"><span>${b.label}</span><span class="v">${b.val}</span></div>`).join('');
-  document.getElementById('resultTitle').textContent=state.phase==='game_over'?(state.scores[mt]>=14?'🎉 Your Team Wins!':'😔 You Lost'):'Round Over';
-  document.getElementById('totalLine').textContent=`Team A: ${state.scores.A} · Team B: ${state.scores.B} · First to 14`;
-  const btn=document.getElementById('nextBtn');
-  btn.textContent=state.phase==='game_over'?'Play Again':'Next Round →';
-  btn.style.display=(myRole===state.dealer||state.phase==='game_over')?'':'none';
-  document.getElementById('resultModal').classList.add('open');
+
+function showGameOver(){
+  const myT=teamOf(myRole,state.teams);
+  const winner=state.scores.A>=14?'A':'B';
+  document.getElementById('gameOverTitle').textContent=myT===winner?'🎉 Your Team Wins!':'😔 You Lost';
+  document.getElementById('gameOverSub').textContent=`Team ${winner} reached 14 points!`;
+  const summary=state.roundSummary||[];
+  document.getElementById('gameOverRows').innerHTML=summary.map(s=>{
+    const valClass=s.team?`summary-val t${s.team.toLowerCase()}`:'summary-val none';
+    const valText=s.team?`+${s.pts} Team ${s.team}`:(s.note||'—');
+    return`<div class="summary-row"><span>${s.label}</span><span class="${valClass}">${valText}</span></div>`;
+  }).join('')+`<div class="summary-row" style="margin-top:8px;"><span>Games Won</span><span><span class="ta">A:${state.gamesWon.A}</span> · <span class="tb">B:${state.gamesWon.B}</span></span></div>`;
+  document.getElementById('summaryModal').classList.remove('open');
+  document.getElementById('gameOverModal').classList.add('open');
 }
+
 function nextRound(){
-  document.getElementById('resultModal').classList.remove('open');
-  if(state.phase==='game_over'){state.scores={A:0,B:0};state.round=0;state.dealer='p0';}
+  document.getElementById('summaryModal').classList.remove('open');
+  dealRound();
+}
+function resetGame(){
+  document.getElementById('gameOverModal').classList.remove('open');
+  state.scores={A:0,B:0};
+  state.round=0;
+  state.dealer='p0';
   dealRound();
 }
 </script>
