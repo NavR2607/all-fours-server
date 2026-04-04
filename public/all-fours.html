@@ -4,685 +4,586 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All Fours — Trinidad</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --felt: #1a4a2e; --felt-light: #245c38; --felt-dark: #0f2e1c;
-    --gold: #c9a84c; --gold-light: #e8c96e; --cream: #f5edd6;
-    --red: #c0392b; --dark: #0a1a10; --card-w: 70px; --card-h: 100px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--felt-dark); font-family: 'Crimson Pro', serif; color: var(--cream); min-height: 100vh; overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px); pointer-events: none; z-index: 0; }
-  #app { position: relative; z-index: 1; min-height: 100vh; }
+:root {
+  --felt: #1b4d32; --felt-light: #266040; --felt-dark: #0e2a1a;
+  --gold: #c9a84c; --gold-light: #e8c96e; --gold-dim: rgba(201,168,76,0.3);
+  --cream: #f5edd6; --red: #c0392b; --dark: #080f09;
+  --card-w: 62px; --card-h: 90px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--felt-dark);font-family:'Crimson Pro',serif;color:var(--cream);min-height:100vh;
+  background-image:radial-gradient(ellipse at 50% 40%,var(--felt-light) 0%,var(--felt) 45%,var(--felt-dark) 100%),
+  repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.008) 3px,rgba(255,255,255,0.008) 6px);
+}
+#app{min-height:100vh;display:flex;flex-direction:column;}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;overflow-y:auto;}
+.screen.active{display:flex;}
+.logo{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,9vw,5rem);font-weight:900;color:var(--gold);text-shadow:0 0 50px rgba(201,168,76,0.35),3px 5px 0 rgba(0,0,0,0.6);letter-spacing:0.03em;line-height:1;text-align:center;}
+.logo em{color:var(--cream);font-style:normal;}
+.tagline{font-style:italic;color:rgba(245,237,214,0.55);font-size:1.05rem;margin:6px 0 32px;letter-spacing:0.12em;}
+.suits-row{font-size:1.6rem;letter-spacing:0.35em;color:var(--gold);margin-bottom:6px;opacity:0.8;}
+.panel{background:rgba(0,0,0,0.4);border:1px solid var(--gold-dim);border-radius:18px;padding:28px 28px 24px;width:100%;max-width:390px;backdrop-filter:blur(6px);}
+input{width:100%;padding:11px 14px;background:rgba(0,0,0,0.35);border:1px solid var(--gold-dim);border-radius:9px;color:var(--cream);font-family:'Crimson Pro',serif;font-size:1rem;outline:none;transition:border-color .2s;margin-bottom:11px;}
+input:focus{border-color:var(--gold);}input::placeholder{color:rgba(245,237,214,0.3);}
+input.big-code{text-align:center;font-size:2rem;letter-spacing:.45em;font-family:'Playfair Display',serif;text-transform:uppercase;}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.05em;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#9a6f20);color:var(--dark);}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(201,168,76,0.4);}
+.btn-ghost{background:rgba(255,255,255,0.07);color:var(--cream);border:1px solid rgba(255,255,255,0.13);margin-top:10px;}
+.btn-ghost:hover{background:rgba(255,255,255,0.13);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+.divider{text-align:center;color:rgba(245,237,214,0.3);font-size:.82rem;margin:16px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:rgba(245,237,214,0.12);}
+.divider::before{left:0;}.divider::after{right:0;}
+.player-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 12px;}
+.player-slot{background:rgba(0,0,0,0.3);border:1px dashed rgba(255,255,255,0.15);border-radius:10px;padding:10px 12px;font-size:.88rem;min-height:52px;display:flex;flex-direction:column;justify-content:center;}
+.player-slot.filled{border-color:var(--gold-dim);border-style:solid;}
+.slot-num{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,237,214,0.4);margin-bottom:2px;}
+.slot-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold-light);}
+.slot-team{font-size:.72rem;margin-top:3px;}.team-a{color:#5dade2;}.team-b{color:#ec7063;}
+.code-box{text-align:center;padding:14px;background:rgba(201,168,76,0.08);border:2px dashed var(--gold-dim);border-radius:12px;margin:14px 0;}
+.code-big{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold-light);letter-spacing:.3em;}
+.code-label{font-size:.72rem;color:rgba(245,237,214,0.45);text-transform:uppercase;letter-spacing:.18em;}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+.team-col{background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;}
+.team-col h4{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.team-col.ta h4{color:#5dade2;}.team-col.tb h4{color:#ec7063;}
+.assign-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.88rem;}
+.assign-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.assign-btn{padding:3px 10px;border:none;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:'Playfair Display',serif;font-weight:700;}
+.assign-btn.to-a{background:rgba(93,173,226,0.25);color:#5dade2;border:1px solid rgba(93,173,226,0.3);}
+.assign-btn.to-b{background:rgba(236,112,99,0.25);color:#ec7063;border:1px solid rgba(236,112,99,0.3);}
 
-  .screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
-  .screen.active { display: flex; }
-
-  .logo { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(201,168,76,0.4), 2px 4px 0 rgba(0,0,0,0.5); letter-spacing: 0.04em; text-align: center; line-height: 1; }
-  .logo span { color: var(--cream); }
-  .subtitle { font-style: italic; color: rgba(245,237,214,0.6); font-size: 1.1rem; margin: 8px 0 40px; letter-spacing: 0.1em; }
-  .suits { font-size: 1.8rem; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 8px; }
-
-  .card-panel { background: rgba(0,0,0,0.35); border: 1px solid rgba(201,168,76,0.25); border-radius: 16px; padding: 32px; width: 100%; max-width: 380px; backdrop-filter: blur(4px); }
-  .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
-  .btn-primary { background: linear-gradient(135deg, var(--gold), #a07828); color: var(--dark); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
-  .btn-secondary { background: rgba(255,255,255,0.08); color: var(--cream); border: 1px solid rgba(255,255,255,0.15); margin-top: 12px; }
-  .btn-secondary:hover { background: rgba(255,255,255,0.14); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-
-  .divider { text-align: center; color: rgba(245,237,214,0.35); font-size: 0.85rem; margin: 20px 0; position: relative; }
-  .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(245,237,214,0.15); }
-  .divider::before { left: 0; } .divider::after { right: 0; }
-
-  input { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; color: var(--cream); font-family: 'Crimson Pro', serif; font-size: 1rem; outline: none; transition: border-color 0.2s; margin-bottom: 12px; }
-  input:focus { border-color: var(--gold); }
-  input::placeholder { color: rgba(245,237,214,0.35); }
-  input.code-input { text-align: center; font-size: 1.8rem; letter-spacing: 0.4em; font-family: 'Playfair Display', serif; text-transform: uppercase; }
-
-  .room-code-display { text-align: center; padding: 16px; background: rgba(201,168,76,0.1); border: 2px dashed rgba(201,168,76,0.4); border-radius: 12px; margin: 16px 0; }
-  .room-code-display .code { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: var(--gold-light); letter-spacing: 0.3em; }
-  .room-code-display .label { font-size: 0.8rem; color: rgba(245,237,214,0.5); text-transform: uppercase; letter-spacing: 0.2em; }
-
-  #gameScreen { padding: 0; justify-content: flex-start; background: var(--felt); background-image: radial-gradient(ellipse at 50% 50%, var(--felt-light) 0%, var(--felt) 60%, var(--felt-dark) 100%), repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px); }
-
-  .table-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(201,168,76,0.2); font-size: 0.85rem; }
-  .score-pill { background: rgba(0,0,0,0.4); border: 1px solid rgba(201,168,76,0.3); border-radius: 20px; padding: 4px 12px; font-family: 'Playfair Display', serif; font-size: 0.95rem; }
-  .score-pill .pts { color: var(--gold); font-weight: 700; }
-  .trump-display { display: flex; align-items: center; gap: 6px; font-size: 1rem; }
-  .trump-suit { font-size: 1.4rem; }
-
-  .opponent-area { padding: 10px 16px 6px; text-align: center; }
-  .player-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(245,237,214,0.5); margin-bottom: 6px; }
-  .opponent-hand { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; }
-
-  .card-back { width: var(--card-w); height: var(--card-h); border-radius: 8px; background: linear-gradient(135deg, #1a237e, #283593); border: 2px solid rgba(255,255,255,0.1); display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 2px 3px 8px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-  .card-back::after { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.05) 3px, rgba(255,255,255,0.05) 6px); }
-
-  .play-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; gap: 12px; }
-  .trick-area { display: flex; gap: 20px; align-items: center; justify-content: center; min-height: 120px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px 24px; border: 1px solid rgba(255,255,255,0.06); width: 100%; max-width: 340px; }
-  .played-card-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .slot-label { font-size: 0.7rem; color: rgba(245,237,214,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
-
-  .card { width: var(--card-w); height: var(--card-h); border-radius: 8px; background: #fff; border: 1.5px solid #ddd; display: flex; flex-direction: column; padding: 4px 5px; cursor: default; box-shadow: 2px 3px 10px rgba(0,0,0,0.45); transition: transform 0.15s, box-shadow 0.15s; position: relative; user-select: none; flex-shrink: 0; }
-  .card.playable { cursor: pointer; border-color: var(--gold); box-shadow: 2px 3px 10px rgba(0,0,0,0.4), 0 0 0 2px rgba(201,168,76,0.5); }
-  .card.playable:hover { transform: translateY(-8px) scale(1.04); box-shadow: 4px 8px 20px rgba(0,0,0,0.5), 0 0 0 2px var(--gold); }
-  .card-rank { font-size: 1rem; font-weight: 700; line-height: 1; font-family: 'Playfair Display', serif; }
-  .card-suit-corner { font-size: 0.85rem; line-height: 1; }
-  .card-center { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
-  .card.red .card-rank, .card.red .card-suit-corner, .card.red .card-center { color: var(--red); }
-  .card.black .card-rank, .card.black .card-suit-corner, .card.black .card-center { color: #111; }
-  .card-bottom { transform: rotate(180deg); }
-
-  .player-area { width: 100%; padding: 6px 8px 10px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.06); }
-  .player-hand { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
-
-  .status-bar { text-align: center; font-size: 0.9rem; padding: 6px 12px; background: rgba(0,0,0,0.3); border-radius: 20px; color: var(--gold-light); font-style: italic; min-height: 34px; display: flex; align-items: center; justify-content: center; }
-
-  .action-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .action-btn { padding: 9px 20px; border: none; border-radius: 8px; font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
-  .action-btn.gold { background: var(--gold); color: var(--dark); }
-  .action-btn.red-btn { background: #8b2020; color: #fff; }
-  .action-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
-  .trump-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
-  .trump-modal.open { display: flex; }
-  .trump-box { background: linear-gradient(160deg, #1e3a28, #0f2218); border: 1px solid rgba(201,168,76,0.4); border-radius: 16px; padding: 28px 32px; text-align: center; max-width: 300px; width: 90%; }
-  .trump-box h3 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.5rem; margin-bottom: 8px; }
-  .trump-box p { color: rgba(245,237,214,0.7); font-size: 0.9rem; margin-bottom: 20px; font-style: italic; }
-  .suit-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .suit-btn { padding: 14px; border: 1.5px solid rgba(255,255,255,0.15); border-radius: 10px; background: rgba(0,0,0,0.3); color: var(--cream); font-size: 1.8rem; cursor: pointer; transition: all 0.15s; }
-  .suit-btn:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); transform: scale(1.05); }
-  .suit-btn.red-suit { color: #e74c3c; }
-
-  .result-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; }
-  .result-modal.open { display: flex; }
-  .result-box { background: linear-gradient(160deg, #1e3a28, #0f2218); border: 1px solid rgba(201,168,76,0.4); border-radius: 16px; padding: 28px; text-align: center; max-width: 340px; width: 90%; }
-  .result-box h2 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.8rem; margin-bottom: 16px; }
-  .score-breakdown { text-align: left; margin: 16px 0; }
-  .score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 0.95rem; }
-  .score-row .val { color: var(--gold); font-weight: 600; }
-
-  .waiting-dot { display: inline-block; animation: blink 1.4s infinite; }
-  .waiting-dot:nth-child(2) { animation-delay: 0.2s; }
-  .waiting-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
-
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); border: 1px solid rgba(201,168,76,0.4); color: var(--cream); padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; z-index: 200; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
-  .toast.show { opacity: 1; }
-
-  .conn-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e74c3c; margin-right: 6px; vertical-align: middle; }
-  .conn-dot.connected { background: #2ecc71; }
+/* GAME */
+#gameScreen{padding:0;justify-content:flex-start;min-height:100vh;}
+.g-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(0,0,0,0.35);border-bottom:1px solid var(--gold-dim);flex-shrink:0;}
+.score-badge{background:rgba(0,0,0,0.45);border:1px solid var(--gold-dim);border-radius:16px;padding:4px 12px;font-family:'Playfair Display',serif;font-size:.88rem;}
+.score-badge .pts{color:var(--gold);font-weight:700;font-size:1rem;}
+.trump-badge{display:flex;align-items:center;gap:5px;font-size:.85rem;}
+.trump-suit{font-size:1.3rem;}
+.opp-top{text-align:center;padding:6px 10px 4px;flex-shrink:0;}
+.opp-top-row{display:flex;justify-content:center;gap:16px;}
+.opp-player{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.p-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,237,214,0.45);}
+.p-name{font-size:.78rem;color:var(--gold-light);font-family:'Playfair Display',serif;}
+.mini-hand{display:flex;gap:2px;}
+.card-back-mini{width:22px;height:34px;border-radius:3px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.15);flex-shrink:0;}
+.side-players{display:flex;justify-content:space-between;align-items:center;padding:0 6px;flex:1;}
+.side-opp{display:flex;flex-direction:column;align-items:center;gap:4px;width:36px;}
+.side-cards{display:flex;flex-direction:column;gap:2px;}
+.card-back-side{width:32px;height:20px;border-radius:3px;background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,0.15);}
+.center-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px;}
+.trick-table{display:grid;grid-template-columns:1fr 80px 1fr;grid-template-rows:auto auto auto;gap:4px;width:100%;max-width:300px;}
+.trick-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.trick-slot-label{font-size:.6rem;color:rgba(245,237,214,0.4);text-transform:uppercase;letter-spacing:.08em;}
+.trick-center{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:rgba(245,237,214,0.15);}
+.status-pill{background:rgba(0,0,0,0.4);border:1px solid var(--gold-dim);border-radius:20px;padding:5px 16px;font-size:.85rem;color:var(--gold-light);font-style:italic;text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center;width:100%;max-width:300px;}
+.action-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.act-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Playfair Display',serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.04em;}
+.act-btn.gold{background:var(--gold);color:var(--dark);}
+.act-btn.danger{background:#7b241c;color:#fff;}
+.act-btn.blue{background:#1a5276;color:#fff;}
+.act-btn:hover{opacity:.85;transform:translateY(-1px);}
+.act-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.my-area{padding:5px 8px 10px;background:rgba(0,0,0,0.25);border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
+.my-hand{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;}
+.card{width:var(--card-w);height:var(--card-h);border-radius:7px;background:#fff;border:1.5px solid #ddd;display:flex;flex-direction:column;padding:3px 4px;cursor:default;box-shadow:2px 3px 10px rgba(0,0,0,0.5);transition:transform .15s,box-shadow .15s;position:relative;user-select:none;flex-shrink:0;}
+.card.playable{cursor:pointer;border-color:var(--gold);box-shadow:2px 3px 10px rgba(0,0,0,0.4),0 0 0 2px rgba(201,168,76,0.5);}
+.card.playable:hover{transform:translateY(-9px) scale(1.05);box-shadow:4px 10px 22px rgba(0,0,0,0.55),0 0 0 2px var(--gold);}
+.card.trump-card{border-color:#c0392b;}
+.c-rank{font-size:.9rem;font-weight:700;line-height:1;font-family:'Playfair Display',serif;}
+.c-suit{font-size:.78rem;line-height:1;}
+.c-mid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.7rem;}
+.c-bot{transform:rotate(180deg);}
+.card.red .c-rank,.card.red .c-suit,.card.red .c-mid{color:var(--red);}
+.card.black .c-rank,.card.black .c-suit,.card.black .c-mid{color:#111;}
+.kick-display{background:rgba(0,0,0,0.3);border:1px solid var(--gold-dim);border-radius:12px;padding:10px 14px;text-align:center;}
+.kick-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(245,237,214,0.45);margin-bottom:6px;}
+.kick-bonuses{margin-top:6px;font-size:.78rem;color:var(--gold-light);}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;}
+.modal.open{display:flex;}
+.modal-box{background:linear-gradient(160deg,#1e3d2a,#0e2018);border:1px solid var(--gold-dim);border-radius:18px;padding:26px 28px;text-align:center;max-width:320px;width:92%;}
+.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem;margin-bottom:8px;}
+.modal-box p{color:rgba(245,237,214,0.65);font-size:.9rem;margin-bottom:18px;font-style:italic;line-height:1.5;}
+.suit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.suit-btn{padding:14px;border:1.5px solid rgba(255,255,255,0.13);border-radius:10px;background:rgba(0,0,0,0.3);font-size:1.7rem;cursor:pointer;transition:all .15s;}
+.suit-btn:hover{background:rgba(201,168,76,0.15);border-color:var(--gold);transform:scale(1.06);}
+.suit-btn.red-s{color:#e74c3c;}.suit-btn.blk-s{color:#eee;}
+.sc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:.9rem;}
+.sc-row .v{color:var(--gold);font-weight:600;}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.88);border:1px solid var(--gold-dim);color:var(--cream);padding:9px 20px;border-radius:20px;font-size:.88rem;z-index:200;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;}
+.toast.show{opacity:1;}
+.dot{display:inline-block;animation:blink 1.4s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- LOBBY -->
-  <div class="screen active" id="lobbyScreen">
-    <div class="suits">♠ ♥ ♦ ♣</div>
-    <div class="logo">All <span>Fours</span></div>
-    <div class="subtitle">Trinidad Style · Since Forever</div>
-    <div class="card-panel">
-      <input type="text" id="playerName" placeholder="Your name" maxlength="16" />
-      <button class="btn btn-primary" onclick="createRoom()">🃏 Create Game</button>
-      <div class="divider">or join a game</div>
-      <input type="text" id="joinCode" class="code-input" placeholder="CODE" maxlength="4" />
-      <button class="btn btn-secondary" onclick="joinRoom()">Join Game</button>
-    </div>
+<!-- LOBBY -->
+<div class="screen active" id="lobbyScreen">
+  <div class="suits-row">♠ ♥ ♦ ♣</div>
+  <div class="logo">All <em>Fours</em></div>
+  <div class="tagline">Trinidad · Four Player · Partners</div>
+  <div class="panel">
+    <input id="playerName" placeholder="Your name" maxlength="14"/>
+    <button class="btn btn-gold" onclick="createRoom()">🃏 Create Game</button>
+    <div class="divider">or join with a code</div>
+    <input id="joinCode" class="big-code" placeholder="CODE" maxlength="4"/>
+    <button class="btn btn-ghost" onclick="joinRoom()">Join Game</button>
   </div>
+</div>
 
-  <!-- WAITING -->
-  <div class="screen" id="waitingScreen">
-    <div class="logo" style="font-size:2.5rem">Waiting<span>...</span></div>
-    <div class="subtitle">Share this code with your opponent</div>
-    <div class="room-code-display">
-      <div class="label">Room Code</div>
-      <div class="code" id="displayCode">----</div>
-      <div class="label" style="margin-top:6px; cursor:pointer" onclick="copyCode()">tap to copy</div>
+<!-- WAITING -->
+<div class="screen" id="waitingScreen">
+  <div class="logo" style="font-size:2.4rem">Waiting<em>...</em></div>
+  <div class="code-box" style="width:100%;max-width:360px">
+    <div class="code-label">Room Code — share with friends</div>
+    <div class="code-big" id="displayCode">----</div>
+    <div class="code-label" style="margin-top:4px;cursor:pointer" onclick="copyCode()">tap to copy</div>
+  </div>
+  <div style="width:100%;max-width:380px">
+    <div class="player-slots" id="playerSlots"></div>
+    <div id="teamAssign" style="display:none">
+      <p style="text-align:center;font-style:italic;font-size:.85rem;color:rgba(245,237,214,0.5);margin-bottom:10px;">Assign teams then start</p>
+      <div class="team-grid">
+        <div class="team-col ta"><h4>⚔ Team A</h4><div id="teamAList"></div></div>
+        <div class="team-col tb"><h4>🛡 Team B</h4><div id="teamBList"></div></div>
+      </div>
+      <button class="btn btn-gold" id="startBtn" onclick="startGame()" style="margin-top:12px;" disabled>Start Game</button>
     </div>
-    <p style="color:rgba(245,237,214,0.5); font-style:italic; margin-top:20px;">
-      Waiting for opponent<span class="waiting-dot">.</span><span class="waiting-dot">.</span><span class="waiting-dot">.</span>
+    <p id="waitMsg" style="text-align:center;color:rgba(245,237,214,0.45);font-style:italic;margin-top:16px;font-size:.88rem;">
+      Waiting for players<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
     </p>
   </div>
+</div>
 
-  <!-- GAME TABLE -->
-  <div class="screen" id="gameScreen">
-    <div class="table-header">
-      <div class="score-pill" id="myScoreDisplay">You: <span class="pts">0</span></div>
-      <div class="trump-display">Trump: <span class="trump-suit" id="trumpDisplay">—</span></div>
-      <div class="score-pill" id="oppScoreDisplay">Opp: <span class="pts">0</span></div>
-    </div>
-    <div class="opponent-area">
-      <div class="player-label" id="oppNameLabel">Opponent</div>
-      <div class="opponent-hand" id="oppHand"></div>
-    </div>
-    <div class="play-area">
-      <div class="status-bar" id="statusBar">Connecting...</div>
-      <div class="trick-area">
-        <div class="played-card-slot">
-          <div class="slot-label" id="oppPlayedLabel">—</div>
-          <div id="oppPlayedCard"></div>
-        </div>
-        <div style="color:rgba(245,237,214,0.2); font-size:2rem;">⚔</div>
-        <div class="played-card-slot">
-          <div class="slot-label" id="myPlayedLabel">—</div>
-          <div id="myPlayedCard"></div>
-        </div>
-      </div>
+<!-- GAME TABLE -->
+<div class="screen" id="gameScreen">
+  <div class="g-header">
+    <div class="score-badge">⚔ A: <span class="pts" id="scoreA">0</span></div>
+    <div class="trump-badge">Trump <span class="trump-suit" id="trumpDisp">—</span></div>
+    <div class="score-badge">🛡 B: <span class="pts" id="scoreB">0</span></div>
+  </div>
+  <div class="opp-top" id="oppTop"></div>
+  <div class="side-players">
+    <div class="side-opp" id="leftOpp"></div>
+    <div class="center-area" style="flex:1;max-width:340px;">
+      <div class="status-pill" id="statusBar">Loading...</div>
+      <div class="trick-table" id="trickTable"></div>
+      <div class="kick-display" id="kickDisplay" style="display:none"></div>
       <div class="action-row" id="actionRow"></div>
     </div>
-    <div class="player-area">
-      <div class="player-label" id="myNameLabel">You</div>
-      <div class="player-hand" id="myHand"></div>
-    </div>
+    <div class="side-opp" id="rightOpp"></div>
   </div>
-
-</div>
-
-<!-- Trump Modal -->
-<div class="trump-modal" id="trumpModal">
-  <div class="trump-box">
-    <h3>Choose Trump</h3>
-    <p id="trumpModalDesc">Select the trump suit</p>
-    <div class="suit-btns">
-      <button class="suit-btn red-suit" onclick="selectTrump('♥','Hearts')">♥</button>
-      <button class="suit-btn" onclick="selectTrump('♠','Spades')">♠</button>
-      <button class="suit-btn red-suit" onclick="selectTrump('♦','Diamonds')">♦</button>
-      <button class="suit-btn" onclick="selectTrump('♣','Clubs')">♣</button>
-    </div>
+  <div class="my-area">
+    <div class="p-label" id="myLabel">Your Hand</div>
+    <div class="my-hand" id="myHand"></div>
   </div>
 </div>
 
-<!-- Round Result Modal -->
-<div class="result-modal" id="resultModal">
-  <div class="result-box">
-    <h2 id="resultTitle">Round Over</h2>
-    <div class="score-breakdown" id="scoreBD"></div>
-    <div style="margin-top:16px; font-family:'Playfair Display',serif; font-size:1.1rem;" id="totalLine"></div>
-    <button class="action-btn gold" style="margin-top:20px; width:100%" onclick="nextRound()">Next Round →</button>
+</div>
+
+<!-- Result Modal -->
+<div class="modal" id="resultModal">
+  <div class="modal-box">
+    <h2 id="resultTitle" style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.7rem;margin-bottom:14px;"></h2>
+    <div id="scoreBD"></div>
+    <div id="totalLine" style="margin-top:12px;font-family:'Playfair Display',serif;font-size:1rem;"></div>
+    <button class="act-btn gold" style="margin-top:18px;width:100%;padding:12px;" id="nextBtn" onclick="nextRound()">Next Round →</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-//  WEBSOCKET MULTIPLAYER — All Fours TT
-// ══════════════════════════════════════════
 const SERVER = 'wss://all-fours-server-production.up.railway.app';
-
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const RANK_VAL = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,J:11,Q:12,K:13,A:14};
 const SUIT_COLOR = {'♠':'black','♣':'black','♥':'red','♦':'red'};
+const ROLES = ['p0','p1','p2','p3'];
 
-let ws = null;
-let myRole = null;
-let myName = '';
-let roomCode = '';
-let gameState = null;
+let ws, myRole, myName, roomCode;
+let state = null;
 
-// ── Utils ──────────────────────────────────
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i>0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-function makeDeck() {
-  const d = [];
-  SUITS.forEach(s => RANKS.forEach(r => d.push({suit:s,rank:r})));
-  return d;
-}
-function cardValue(c) {
-  return {A:4,K:3,Q:2,J:1,10:10}[c.rank] || 0;
-}
-function rankCard(c, trump, ledSuit) {
-  if (c.suit === trump) return 100 + RANK_VAL[c.rank];
-  if (c.suit === ledSuit) return RANK_VAL[c.rank];
-  return 0;
-}
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function toast(msg, dur=2800) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
-}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function makeDeck(){const d=[];SUITS.forEach(s=>RANKS.forEach(r=>d.push({suit:s,rank:r})));return d;}
+function cardVal(c){return({A:4,K:3,Q:2,J:1,10:10}[c.rank])||0;}
+function rankCard(c,trump,led){if(c.suit===trump)return 100+RANK_VAL[c.rank];if(c.suit===led)return RANK_VAL[c.rank];return 0;}
+function teamOf(role,teams){if(!teams)return null;if((teams.A||[]).includes(role))return'A';if((teams.B||[]).includes(role))return'B';return null;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function copyCode(){navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied!')).catch(()=>{});}
 
-// ── WebSocket ──────────────────────────────
-function connect(onOpen) {
-  ws = new WebSocket(SERVER);
-  ws.onopen = () => { if (onOpen) onOpen(); };
-  ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
-  ws.onerror = () => toast('Connection error — check your internet');
-  ws.onclose = () => {
-    if (gameState) toast('Connection lost. Reconnecting...', 4000);
-  };
+// ── WebSocket
+function connect(cb){
+  ws=new WebSocket(SERVER);
+  ws.onopen=cb;
+  ws.onmessage=e=>handleMsg(JSON.parse(e.data));
+  ws.onerror=()=>toast('Connection error');
+  ws.onclose=()=>{if(state)toast('Disconnected — refresh to rejoin',4000);};
 }
+function send(obj){if(ws&&ws.readyState===1)ws.send(JSON.stringify(obj));}
 
-function send(obj) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(obj));
-  }
-}
-
-function handleMessage(msg) {
-  switch(msg.type) {
-    case 'created':
-      document.getElementById('displayCode').textContent = roomCode;
-      showScreen('waitingScreen');
-      break;
-
-    case 'joined':
-    case 'opponent_joined':
-      gameState = msg.state;
-      myRole = msg.type === 'joined' ? 'guest' : 'host';
-      showScreen('gameScreen');
-      renderGame();
-      // Guest triggers the first deal
-      if (myRole === 'guest') setTimeout(() => dealRound(), 400);
-      break;
-
+function handleMsg(msg){
+  switch(msg.type){
+    case 'created': myRole=msg.role; state=msg.state; showScreen('waitingScreen'); renderWaiting(); break;
+    case 'joined':  myRole=msg.role; state=msg.state; showScreen('waitingScreen'); renderWaiting(); break;
+    case 'lobby_update': state=msg.state; renderWaiting(); break;
     case 'state':
-      gameState = msg.state;
-      renderGame();
-      handlePhaseChange();
+      state=msg.state; myRole=state.myRole||myRole;
+      if(state.phase==='lobby'||state.phase==='team_select'){showScreen('waitingScreen');renderWaiting();}
+      else{showScreen('gameScreen');renderGame();handlePhaseUI();}
       break;
-
-    case 'opponent_left':
-      toast('Opponent disconnected 😢', 5000);
-      break;
-
-    case 'error':
-      toast(msg.msg);
-      break;
+    case 'player_left': toast('A player disconnected 😢',4000); break;
+    case 'error': toast(msg.msg); break;
   }
 }
 
-// ── Lobby ──────────────────────────────────
-function createRoom() {
-  myName = document.getElementById('playerName').value.trim() || 'Player 1';
-  myRole = 'host';
-  roomCode = Math.random().toString(36).substr(2,4).toUpperCase();
-
-  const initState = {
-    host: myName, guest: null,
-    phase: 'waiting',
-    scores: {host:0, guest:0},
-    round: 0,
-    hands: {host:[], guest:[]},
-    trumpSuit: null, trump: null,
-    dealer: 'host', turn: null,
-    trickCard: {host:null, guest:null},
-    trickWins: {host:0, guest:0},
-    ledSuit: null,
-    highestTrump: null, lowestTrump: null,
-    jackCaptured: null,
-    gamePoints: {host:0, guest:0},
-    beastDeclined: [],
-  };
-
-  connect(() => {
-    send({ type: 'create', code: roomCode, state: initState });
-  });
+// ── Lobby
+function createRoom(){
+  myName=document.getElementById('playerName').value.trim()||'Player 1';
+  myRole='p0'; roomCode=Math.random().toString(36).substr(2,4).toUpperCase();
+  connect(()=>send({type:'create',code:roomCode,name:myName}));
+}
+function joinRoom(){
+  myName=document.getElementById('playerName').value.trim()||'Player';
+  roomCode=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(roomCode.length!==4){toast('Enter a 4-letter code');return;}
+  connect(()=>send({type:'join',code:roomCode,name:myName}));
 }
 
-function joinRoom() {
-  myName = document.getElementById('playerName').value.trim() || 'Player 2';
-  myRole = 'guest';
-  roomCode = document.getElementById('joinCode').value.trim().toUpperCase();
-  if (roomCode.length !== 4) { toast('Enter a 4-letter room code'); return; }
-
-  connect(() => {
-    send({ type: 'join', code: roomCode, name: myName });
-  });
-}
-
-function copyCode() {
-  navigator.clipboard.writeText(roomCode).then(() => toast('Code copied!')).catch(()=>{});
-}
-
-// ── Dealing ────────────────────────────────
-function dealRound() {
-  const deck = shuffle(makeDeck());
-  gameState.hands = { host: deck.slice(0,6), guest: deck.slice(6,12) };
-  gameState.phase = 'trump_call';
-  gameState.turn = gameState.dealer === 'host' ? 'guest' : 'host';
-  gameState.trickCard = {host:null, guest:null};
-  gameState.trickWins = {host:0, guest:0};
-  gameState.ledSuit = null;
-  gameState.highestTrump = null;
-  gameState.lowestTrump = null;
-  gameState.jackCaptured = null;
-  gameState.gamePoints = {host:0, guest:0};
-  gameState.beastDeclined = [];
-  gameState.trumpSuit = null;
-  gameState.trump = null;
-  gameState._htWinner = null;
-  gameState._ltWinner = null;
-  gameState._gpWinner = null;
-  gameState.round++;
-  saveState();
-}
-
-function saveState() {
-  send({ type: 'update', state: gameState });
-  renderGame();
-}
-
-// ── Render ─────────────────────────────────
-function renderGame() {
-  if (!gameState) return;
-  const me = myRole;
-  const opp = me === 'host' ? 'guest' : 'host';
-
-  document.getElementById('myNameLabel').textContent = gameState[me] || myName;
-  document.getElementById('oppNameLabel').textContent = gameState[opp] || 'Opponent';
-  document.getElementById('myPlayedLabel').textContent = gameState[me] || 'You';
-  document.getElementById('oppPlayedLabel').textContent = gameState[opp] || 'Opp';
-
-  document.getElementById('myScoreDisplay').innerHTML = `${gameState[me]||'You'}: <span class="pts">${gameState.scores[me]}</span>`;
-  document.getElementById('oppScoreDisplay').innerHTML = `${gameState[opp]||'Opp'}: <span class="pts">${gameState.scores[opp]}</span>`;
-
-  const ts = gameState.trumpSuit;
-  document.getElementById('trumpDisplay').textContent = ts || '—';
-  document.getElementById('trumpDisplay').style.color = ts ? (SUIT_COLOR[ts]==='red'?'#e74c3c':'#fff') : '';
-
-  // Opponent hand (face down)
-  const oppCards = gameState.hands[opp] || [];
-  document.getElementById('oppHand').innerHTML = oppCards.map(() => `<div class="card-back">🂠</div>`).join('');
-
-  // My hand
-  const myCards = gameState.hands[me] || [];
-  const canAct = isMyTurn() && gameState.phase === 'playing';
-  document.getElementById('myHand').innerHTML = myCards.map((c,i) => {
-    const color = SUIT_COLOR[c.suit];
-    const ok = canAct && canPlayCard(c, myCards);
-    return `<div class="card ${color} ${ok?'playable':''}" onclick="${ok?`playCard(${i})`:''}" >
-      <div><div class="card-rank">${c.rank}</div><div class="card-suit-corner">${c.suit}</div></div>
-      <div class="card-center">${c.suit}</div>
-      <div class="card-bottom"><div class="card-rank">${c.rank}</div><div class="card-suit-corner">${c.suit}</div></div>
+function renderWaiting(){
+  document.getElementById('displayCode').textContent=roomCode||'----';
+  document.getElementById('playerSlots').innerHTML=ROLES.map((r,i)=>{
+    const name=state[r]; const team=state.teams?teamOf(r,state.teams):null;
+    const tl=team?`<div class="slot-team team-${team.toLowerCase()}">Team ${team}</div>`:'';
+    return `<div class="player-slot ${name?'filled':''}">
+      <div class="slot-num">Player ${i+1}</div>
+      ${name?`<div class="slot-name">${name}</div>${tl}`:'<div style="color:rgba(245,237,214,0.25);font-size:.82rem;">Empty</div>'}
     </div>`;
   }).join('');
 
-  // Trick area
-  document.getElementById('myPlayedCard').innerHTML = gameState.trickCard[me] ? renderCardHtml(gameState.trickCard[me]) : '';
-  document.getElementById('oppPlayedCard').innerHTML = gameState.trickCard[opp] ? renderCardHtml(gameState.trickCard[opp]) : '';
+  const allJoined=state.playerCount===4;
+  const isHost=myRole==='p0';
+  const waitMsg=document.getElementById('waitMsg');
+  const teamDiv=document.getElementById('teamAssign');
 
-  renderStatus();
-  renderActions();
-}
-
-function renderCardHtml(c) {
-  const color = SUIT_COLOR[c.suit];
-  return `<div class="card ${color}" style="cursor:default">
-    <div><div class="card-rank">${c.rank}</div><div class="card-suit-corner">${c.suit}</div></div>
-    <div class="card-center">${c.suit}</div>
-    <div class="card-bottom"><div class="card-rank">${c.rank}</div><div class="card-suit-corner">${c.suit}</div></div>
-  </div>`;
-}
-
-function isMyTurn() { return gameState && gameState.turn === myRole; }
-
-function renderStatus() {
-  const bar = document.getElementById('statusBar');
-  const phase = gameState.phase;
-  const myTurn = isMyTurn();
-  const opp = myRole === 'host' ? 'guest' : 'host';
-
-  if (phase === 'waiting') { bar.textContent = 'Waiting for opponent...'; return; }
-  if (phase === 'dealing') { bar.textContent = 'Dealing cards...'; return; }
-  if (phase === 'trump_call') {
-    const declined = gameState.beastDeclined || [];
-    if (declined.includes(myRole) && myTurn) {
-      bar.textContent = 'You must choose trump!';
-    } else {
-      bar.textContent = myTurn ? 'Beast or pass?' : `Waiting for ${gameState[gameState.turn]||'opponent'}...`;
-    }
-    return;
-  }
-  if (phase === 'playing') {
-    const tw = gameState.trickWins;
-    bar.textContent = myTurn
-      ? `Your turn — You: ${tw[myRole]} tricks · Opp: ${tw[opp]} tricks`
-      : `${gameState[gameState.turn]||'Opponent'}'s turn...`;
-    return;
-  }
-  if (phase === 'round_end') { bar.textContent = 'Round complete!'; return; }
-  if (phase === 'game_over') {
-    const w = gameState.scores.host >= 11 ? gameState.host : gameState.guest;
-    bar.textContent = `Game over! ${w} wins! 🎉`;
-  }
-}
-
-function renderActions() {
-  const row = document.getElementById('actionRow');
-  row.innerHTML = '';
-  if (gameState.phase !== 'trump_call' || !isMyTurn()) return;
-
-  const declined = gameState.beastDeclined || [];
-  if (!declined.includes(myRole)) {
-    row.innerHTML = `
-      <button class="action-btn gold" onclick="beast()">🐅 Beast</button>
-      <button class="action-btn red-btn" onclick="pass()">Pass</button>`;
+  if(allJoined&&isHost){
+    teamDiv.style.display='block'; waitMsg.style.display='none'; renderTeamAssign();
+  } else if(allJoined&&!isHost){
+    teamDiv.style.display='none'; waitMsg.style.display='block';
+    waitMsg.innerHTML='Host is setting up teams<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
   } else {
-    row.innerHTML = `<button class="action-btn gold" onclick="openTrumpModal()">Choose Trump Suit</button>`;
+    teamDiv.style.display='none'; waitMsg.style.display='block';
+    waitMsg.innerHTML=`${state.playerCount}/4 players joined<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>`;
   }
 }
 
-// ── Trump Phase ────────────────────────────
-function openTrumpModal() {
-  document.getElementById('trumpModalDesc').textContent = 'Pick your trump suit';
-  document.getElementById('trumpModal').classList.add('open');
+function renderTeamAssign(){
+  if(!state.teams) state.teams={A:['p0','p2'],B:['p1','p3']};
+  const ml=(tk)=>state.teams[tk].map(r=>{
+    const other=tk==='A'?'B':'A';
+    return `<div class="assign-row"><span class="assign-name">${state[r]||r}</span>
+      <button class="assign-btn to-${other.toLowerCase()}" onclick="moveToTeam('${r}','${other}')">→ ${other}</button></div>`;
+  }).join('');
+  document.getElementById('teamAList').innerHTML=ml('A');
+  document.getElementById('teamBList').innerHTML=ml('B');
+  document.getElementById('startBtn').disabled=!(state.teams.A.length===2&&state.teams.B.length===2);
 }
 
-function beast() {
-  if (!isMyTurn()) return;
-  document.getElementById('trumpModalDesc').textContent = 'You beasted! Choose trump suit';
-  document.getElementById('trumpModal').classList.add('open');
+function moveToTeam(role,toTeam){
+  const from=toTeam==='A'?'B':'A';
+  state.teams[from]=state.teams[from].filter(r=>r!==role);
+  state.teams[toTeam].push(role);
+  renderTeamAssign();
+  send({type:'update_lobby',state});
 }
 
-function pass() {
-  if (!isMyTurn()) return;
-  const declined = [...(gameState.beastDeclined || [])];
-  declined.push(myRole);
-  gameState.beastDeclined = declined;
-  const opp = myRole === 'host' ? 'guest' : 'host';
+function startGame(){
+  if(!state.teams||state.teams.A.length!==2||state.teams.B.length!==2){toast('Each team needs 2 players');return;}
+  dealRound();
+}
 
-  if (declined.length >= 2) {
-    // Both passed — dealer must choose
-    gameState.turn = gameState.dealer;
-    gameState.beastDeclined = [opp];
-  } else {
-    gameState.turn = opp;
+// ── Dealing
+function dealRound(){
+  const deck=shuffle(makeDeck());
+  state.hands={p0:deck.slice(0,6),p1:deck.slice(6,12),p2:deck.slice(12,18),p3:deck.slice(18,24)};
+  state.remainingDeck=deck.slice(24);
+  const kickCard=state.remainingDeck.shift();
+  state.kickCard=kickCard;
+  state.trumpSuit=kickCard.suit;
+  state.kickBonuses=calcKickBonuses(kickCard,state.dealer,state.teams);
+
+  const allCards=ROLES.flatMap(r=>state.hands[r]);
+  const trumps=allCards.filter(c=>c.suit===state.trumpSuit);
+  state.highTrumpHolder=null; state.lowTrumpHolder=null;
+  if(trumps.length>0){
+    const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
+    const lt=trumps.reduce((a,b)=>RANK_VAL[a.rank]<RANK_VAL[b.rank]?a:b);
+    ROLES.forEach(r=>{
+      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highTrumpHolder=r;
+      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowTrumpHolder=r;
+    });
   }
-  saveState();
+
+  state.phase='bet';
+  state.trickCard={p0:null,p1:null,p2:null,p3:null};
+  state.trickWins={p0:0,p1:0,p2:0,p3:0};
+  state.ledSuit=null; state.jackCaptured=null;
+  state.gamePoints={p0:0,p1:0,p2:0,p3:0};
+  state.betStatus=null; state.bettor=null; state.trickCount=0;
+  state.roundPts=null; state.roundBreakdown=null;
+  state.round=(state.round||0)+1;
+  const di=ROLES.indexOf(state.dealer);
+  state.turn=ROLES[(di+1)%4];
+  send({type:'update',state});
 }
 
-function selectTrump(suit, name) {
-  document.getElementById('trumpModal').classList.remove('open');
-  gameState.trumpSuit = suit;
-  gameState.trump = name;
+function calcKickBonuses(card,dealerRole,teams){
+  const bonuses=[]; const dt=teamOf(dealerRole,teams); if(!dt)return bonuses;
+  if(card.rank==='A') bonuses.push({pts:1,team:dt,reason:'Ace kicked'});
+  if(card.rank==='6') bonuses.push({pts:2,team:dt,reason:'Six kicked'});
+  if(card.rank==='J'&&card.suit!=='♦') bonuses.push({pts:1,team:dt,reason:'Jack kicked'});
+  if(card.rank==='J'&&card.suit==='♦') bonuses.push({pts:4,team:dt,reason:'Jack of Diamonds kicked!'});
+  return bonuses;
+}
 
-  const allCards = [...gameState.hands.host, ...gameState.hands.guest];
-  const trumpCards = allCards.filter(c => c.suit === suit);
-  if (trumpCards.length > 0) {
-    gameState.highestTrump = trumpCards.reduce((a,b) => RANK_VAL[a.rank] > RANK_VAL[b.rank] ? a : b);
-    gameState.lowestTrump  = trumpCards.reduce((a,b) => RANK_VAL[a.rank] < RANK_VAL[b.rank] ? a : b);
+function runThePack(){
+  ROLES.forEach(r=>{state.hands[r]=[...state.hands[r],...state.remainingDeck.splice(0,3)];});
+  let kick=state.remainingDeck.shift();
+  while(kick&&kick.suit===state.trumpSuit&&state.remainingDeck.length>0){
+    state.hands[state.dealer]=[...state.hands[state.dealer],kick];
+    kick=state.remainingDeck.shift();
   }
+  if(!kick){toast('Deck exhausted — redealing');dealRound();return;}
+  state.kickCard=kick; state.trumpSuit=kick.suit;
+  state.kickBonuses=[...(state.kickBonuses||[]),...calcKickBonuses(kick,state.dealer,state.teams)];
 
-  gameState.turn = gameState.dealer === 'host' ? 'guest' : 'host';
-  gameState.phase = 'playing';
-  saveState();
+  const allCards=ROLES.flatMap(r=>state.hands[r]);
+  const trumps=allCards.filter(c=>c.suit===state.trumpSuit);
+  if(trumps.length>0){
+    const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
+    const lt=trumps.reduce((a,b)=>RANK_VAL[a.rank]<RANK_VAL[b.rank]?a:b);
+    ROLES.forEach(r=>{
+      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highTrumpHolder=r;
+      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowTrumpHolder=r;
+    });
+  }
+  const di=ROLES.indexOf(state.dealer);
+  state.turn=ROLES[(di+1)%4]; state.phase='playing';
+  send({type:'update',state});
 }
 
-// ── Playing Phase ──────────────────────────
-function canPlayCard(card, hand) {
-  const trump = gameState.trumpSuit;
-  const led = gameState.ledSuit;
-  if (!led) return true;
-  const hasSuit = hand.some(c => c.suit === led && c.suit !== trump);
-  if (hasSuit) return card.suit === led;
+// ── Render Game
+function renderGame(){
+  if(!state)return;
+  const me=myRole;
+  const myIdx=ROLES.indexOf(me);
+  const rightRole=ROLES[(myIdx+1)%4];
+  const topRole=ROLES[(myIdx+2)%4];
+  const leftRole=ROLES[(myIdx+3)%4];
+
+  document.getElementById('scoreA').textContent=state.scores.A;
+  document.getElementById('scoreB').textContent=state.scores.B;
+  const ts=state.trumpSuit;
+  const td=document.getElementById('trumpDisp');
+  td.textContent=ts||'—';
+  td.style.color=ts?(SUIT_COLOR[ts]==='red'?'#e74c3c':'#eee'):'';
+
+  // Top opponent
+  document.getElementById('oppTop').innerHTML=`<div class="opp-top-row"><div class="opp-player">
+    <div class="p-name">${state[topRole]||'?'} <span style="font-size:.65rem;color:${teamOf(topRole,state.teams)==='A'?'#5dade2':'#ec7063'}">Team ${teamOf(topRole,state.teams)||'?'}</span></div>
+    <div class="mini-hand">${(state.hands[topRole]||[]).map(()=>`<div class="card-back-mini"></div>`).join('')}</div>
+  </div></div>`;
+
+  // Side opps
+  document.getElementById('leftOpp').innerHTML=`
+    <div class="p-name" style="font-size:.65rem;writing-mode:vertical-rl;transform:rotate(180deg);margin-bottom:4px;">${state[leftRole]||'?'}</div>
+    <div class="side-cards">${(state.hands[leftRole]||[]).map(()=>`<div class="card-back-side"></div>`).join('')}</div>`;
+  document.getElementById('rightOpp').innerHTML=`
+    <div class="p-name" style="font-size:.65rem;writing-mode:vertical-rl;margin-bottom:4px;">${state[rightRole]||'?'}</div>
+    <div class="side-cards">${(state.hands[rightRole]||[]).map(()=>`<div class="card-back-side"></div>`).join('')}</div>`;
+
+  // Trick table
+  document.getElementById('trickTable').innerHTML=`
+    <div></div><div class="trick-slot">${trickSlot(topRole)}</div><div></div>
+    <div class="trick-slot">${trickSlot(leftRole)}</div>
+    <div class="trick-center">⚔</div>
+    <div class="trick-slot">${trickSlot(rightRole)}</div>
+    <div></div><div class="trick-slot">${trickSlot(me)}</div><div></div>`;
+
+  // Kick display
+  const kd=document.getElementById('kickDisplay');
+  if(state.kickCard&&state.phase!=='lobby'){
+    kd.style.display='block';
+    const bonusText=(state.kickBonuses||[]).map(b=>`+${b.pts} Team ${b.team}: ${b.reason}`).join(' · ');
+    kd.innerHTML=`<div class="kick-label">Trump Kicked</div>${smallCardHtml(state.kickCard)}${bonusText?`<div class="kick-bonuses">${bonusText}</div>`:''}`;
+  } else kd.style.display='none';
+
+  // My hand
+  document.getElementById('myLabel').textContent=`${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}`;
+  const myCards=(state.hands&&state.hands[me])||[];
+  const canPlay=isMyTurn()&&state.phase==='playing';
+  document.getElementById('myHand').innerHTML=myCards.map((c,i)=>{
+    if(c.hidden)return'';
+    const ok=canPlay&&canPlayCard(c,myCards);
+    return`<div class="card ${SUIT_COLOR[c.suit]} ${ok?'playable':''} ${ts&&c.suit===ts?'trump-card':''}" onclick="${ok?`playCard(${i})`:''}">\
+      <div><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>\
+      <div class="c-mid">${c.suit}</div>\
+      <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
+  }).join('');
+
+  renderStatus(); renderActions();
+}
+
+function trickSlot(role){
+  const c=state&&state.trickCard&&state.trickCard[role];
+  const nm=state&&state[role]?state[role].split(' ')[0]:'';
+  if(!c)return`<div class="trick-slot-label">${nm}</div><div style="width:48px;height:68px;border-radius:6px;border:1px dashed rgba(255,255,255,0.1);"></div>`;
+  return`<div class="trick-slot-label">${nm}</div>${smallCardHtml(c)}`;
+}
+
+function smallCardHtml(c){
+  if(!c||c.hidden)return'';
+  const col=SUIT_COLOR[c.suit];
+  return`<div class="card ${col}" style="width:48px;height:68px;cursor:default;font-size:.8rem;">\
+    <div><div class="c-rank" style="font-size:.75rem">${c.rank}</div><div class="c-suit" style="font-size:.7rem">${c.suit}</div></div>\
+    <div class="c-mid" style="font-size:1.1rem">${c.suit}</div>\
+    <div class="c-bot"><div class="c-rank" style="font-size:.75rem">${c.rank}</div><div class="c-suit" style="font-size:.7rem">${c.suit}</div></div></div>`;
+}
+
+function isMyTurn(){return state&&state.turn===myRole;}
+
+function renderStatus(){
+  const bar=document.getElementById('statusBar');
+  const ph=state.phase; const mt=isMyTurn();
+  const turnName=state[state.turn]||'?';
+  if(ph==='bet'){bar.textContent=mt?'Bet or Stand?':`Waiting for ${turnName} to bet or stand...`;return;}
+  if(ph==='dealer_choice'){bar.textContent=state.turn===myRole?'Give or Run the Pack?':`${turnName} (dealer) deciding...`;return;}
+  if(ph==='playing'){
+    const tw=state.trickWins; const mt2=teamOf(myRole,state.teams);
+    const tt=(state.teams&&state.teams[mt2]||[]).reduce((s,r)=>s+(tw[r]||0),0);
+    bar.textContent=mt?`Your turn — Team ${mt2}: ${tt} tricks`:`${turnName}'s turn...`;return;
+  }
+  if(ph==='round_end'){bar.textContent='Round complete!';return;}
+  if(ph==='game_over'){const w=state.scores.A>=14?'A':'B';bar.textContent=`Game over! Team ${w} wins! 🎉`;}
+}
+
+function renderActions(){
+  const row=document.getElementById('actionRow'); row.innerHTML='';
+  if(state.phase==='bet'&&isMyTurn()){
+    row.innerHTML=`<button class="act-btn gold" onclick="doBet()">💰 Bet</button><button class="act-btn danger" onclick="doStand()">Stand</button>`;
+  } else if(state.phase==='dealer_choice'&&state.turn===myRole){
+    row.innerHTML=`<button class="act-btn blue" onclick="doGive()">Give (+1 to bettor)</button><button class="act-btn gold" onclick="doRunPack()">Run the Pack 🃏</button>`;
+  }
+}
+
+// ── Bet Phase
+function doBet(){
+  if(!isMyTurn())return;
+  state.bettor=myRole; state.betStatus='bet';
+  state.phase='dealer_choice'; state.turn=state.dealer;
+  send({type:'update',state});
+}
+function doStand(){
+  if(!isMyTurn())return;
+  state.betStatus='stand'; state.phase='playing';
+  const di=ROLES.indexOf(state.dealer);
+  state.turn=ROLES[(di+1)%4];
+  send({type:'update',state});
+}
+function doGive(){
+  if(state.turn!==myRole)return;
+  const bt=teamOf(state.bettor,state.teams);
+  state.scores[bt]=(state.scores[bt]||0)+1;
+  toast(`+1 to Team ${bt} (Give)`);
+  state.phase='playing';
+  const di=ROLES.indexOf(state.dealer);
+  state.turn=ROLES[(di+1)%4];
+  send({type:'update',state});
+}
+function doRunPack(){if(state.turn!==myRole)return; runThePack();}
+
+// ── Playing Phase
+function canPlayCard(card,hand){
+  const trump=state.trumpSuit; const led=state.ledSuit;
+  if(!led)return true;
+  const hasSuit=hand.some(c=>!c.hidden&&c.suit===led&&c.suit!==trump);
+  if(hasSuit)return card.suit===led;
   return true;
 }
-
-function playCard(idx) {
-  if (!isMyTurn() || gameState.phase !== 'playing') return;
-  const me = myRole;
-  const opp = me === 'host' ? 'guest' : 'host';
-  const hand = [...gameState.hands[me]];
-  const card = hand[idx];
-
-  if (!canPlayCard(card, hand)) { toast('You must follow suit!'); return; }
-
-  hand.splice(idx, 1);
-  gameState.hands[me] = hand;
-  gameState.trickCard[me] = card;
-  if (!gameState.ledSuit) gameState.ledSuit = card.suit;
-
-  if (gameState.trickCard[opp]) {
-    resolveTrick();
-  } else {
-    gameState.turn = opp;
-    saveState();
-  }
+function playCard(idx){
+  if(!isMyTurn()||state.phase!=='playing')return;
+  const hand=[...(state.hands[myRole]||[])];
+  const card=hand[idx];
+  if(!card||card.hidden)return;
+  if(!canPlayCard(card,hand)){toast('You must follow suit!');return;}
+  hand.splice(idx,1);
+  state.hands[myRole]=hand;
+  state.trickCard[myRole]=card;
+  if(!state.ledSuit)state.ledSuit=card.suit;
+  const allPlayed=ROLES.every(r=>state.trickCard[r]!==null);
+  if(allPlayed){resolveTrick();}
+  else{const i2=ROLES.indexOf(myRole);state.turn=ROLES[(i2+1)%4];send({type:'update',state});}
 }
 
-function resolveTrick() {
-  const me = myRole;
-  const opp = me === 'host' ? 'guest' : 'host';
-  const trump = gameState.trumpSuit;
-  const led = gameState.ledSuit;
-
-  const myCard = gameState.trickCard[me];
-  const oppCard = gameState.trickCard[opp];
-  const myVal = rankCard(myCard, trump, led);
-  const oppVal = rankCard(oppCard, trump, led);
-  const winner = myVal >= oppVal ? me : opp;
-
-  gameState.trickWins[winner]++;
-
-  // Jack of trump
-  if (myCard.rank === 'J' && myCard.suit === trump) gameState.jackCaptured = winner;
-  if (oppCard.rank === 'J' && oppCard.suit === trump) gameState.jackCaptured = winner;
-
-  // Game points
-  gameState.gamePoints[me] = (gameState.gamePoints[me]||0) + cardValue(myCard);
-  gameState.gamePoints[opp] = (gameState.gamePoints[opp]||0) + cardValue(oppCard);
-
-  gameState.trickCard = {host:null, guest:null};
-  gameState.ledSuit = null;
-
-  if (gameState.hands.host.length === 0 && gameState.hands.guest.length === 0) {
-    scoreRound();
-  } else {
-    gameState.turn = winner;
-    saveState();
-  }
+function resolveTrick(){
+  const trump=state.trumpSuit; const led=state.ledSuit;
+  let best=null,winner=null;
+  ROLES.forEach(r=>{const c=state.trickCard[r];const v=rankCard(c,trump,led);if(best===null||v>best){best=v;winner=r;}});
+  state.trickWins[winner]++;
+  state.trickCount++;
+  ROLES.forEach(r=>{const c=state.trickCard[r];if(c.rank==='J'&&c.suit===trump)state.jackCaptured=winner;});
+  ROLES.forEach(r=>{state.gamePoints[r]=(state.gamePoints[r]||0)+cardVal(state.trickCard[r]);});
+  state.trickCard={p0:null,p1:null,p2:null,p3:null};
+  state.ledSuit=null;
+  const done=ROLES.every(r=>(state.hands[r]||[]).length===0);
+  if(done)scoreRound();
+  else{state.turn=winner;send({type:'update',state});}
 }
 
-// ── Scoring ────────────────────────────────
-function scoreRound() {
-  const roundPts = {host:0, guest:0};
-
-  // Highest trump — to whoever won the most tricks
-  if (gameState.highestTrump) {
-    const htWinner = gameState.trickWins.host >= gameState.trickWins.guest ? 'host' : 'guest';
-    roundPts[htWinner]++;
-    gameState._htWinner = htWinner;
-  }
-
-  // Lowest trump — to whoever won the fewest tricks
-  if (gameState.lowestTrump) {
-    const ltWinner = gameState.trickWins.host <= gameState.trickWins.guest ? 'host' : 'guest';
-    roundPts[ltWinner]++;
-    gameState._ltWinner = ltWinner;
-  }
-
-  // Jack of trump
-  if (gameState.jackCaptured) {
-    roundPts[gameState.jackCaptured]++;
-  }
-
-  // Game — most card points
-  const gpHost = gameState.gamePoints.host || 0;
-  const gpGuest = gameState.gamePoints.guest || 0;
-  if (gpHost !== gpGuest) {
-    const gpWinner = gpHost > gpGuest ? 'host' : 'guest';
-    roundPts[gpWinner]++;
-    gameState._gpWinner = gpWinner;
-  }
-
-  gameState.roundPts = roundPts;
-  gameState.scores.host += roundPts.host;
-  gameState.scores.guest += roundPts.guest;
-
-  if (gameState.scores.host >= 11 || gameState.scores.guest >= 11) {
-    gameState.phase = 'game_over';
-  } else {
-    gameState.phase = 'round_end';
-    gameState.dealer = gameState.dealer === 'host' ? 'guest' : 'host';
-  }
-
-  saveState();
+// ── Scoring
+function scoreRound(){
+  const rp={A:0,B:0}; const bd=[];
+  (state.kickBonuses||[]).forEach(b=>{rp[b.team]+=b.pts;bd.push({label:b.reason,val:`+${b.pts} Team ${b.team}`});});
+  if(state.highTrumpHolder){const t=teamOf(state.highTrumpHolder,state.teams);rp[t]++;bd.push({label:'🏆 Highest Trump',val:`+1 Team ${t}`});}
+  if(state.lowTrumpHolder){const t=teamOf(state.lowTrumpHolder,state.teams);rp[t]++;bd.push({label:'🔻 Lowest Trump',val:`+1 Team ${t}`});}
+  if(state.jackCaptured){const t=teamOf(state.jackCaptured,state.teams);rp[t]++;bd.push({label:'🃏 Hanging Jack',val:`+1 Team ${t}`});}
+  const gpA=(state.teams.A||[]).reduce((s,r)=>s+(state.gamePoints[r]||0),0);
+  const gpB=(state.teams.B||[]).reduce((s,r)=>s+(state.gamePoints[r]||0),0);
+  if(gpA!==gpB){const gw=gpA>gpB?'A':'B';rp[gw]+=2;bd.push({label:`🎯 Game (A:${gpA} B:${gpB})`,val:`+2 Team ${gw}`});}
+  state.scores.A=(state.scores.A||0)+rp.A;
+  state.scores.B=(state.scores.B||0)+rp.B;
+  state.roundPts=rp; state.roundBreakdown=bd;
+  if(state.scores.A>=14||state.scores.B>=14){state.phase='game_over';}
+  else{state.phase='round_end';const di=ROLES.indexOf(state.dealer);state.dealer=ROLES[(di+1)%4];}
+  send({type:'update',state});
 }
 
-function handlePhaseChange() {
-  if (gameState.phase === 'round_end' || gameState.phase === 'game_over') {
-    showRoundResult();
-  }
-  if (gameState.phase === 'trump_call' && isMyTurn()) {
-    const declined = gameState.beastDeclined || [];
-    if (declined.includes(myRole)) {
-      document.getElementById('trumpModalDesc').textContent = 'Choose trump (both passed)';
-      document.getElementById('trumpModal').classList.add('open');
-    }
-  }
+function handlePhaseUI(){
+  if(state.phase==='round_end'||state.phase==='game_over')showResult();
 }
-
-function showRoundResult() {
-  const me = myRole;
-  const opp = me === 'host' ? 'guest' : 'host';
-  const trump = gameState.trumpSuit;
-
-  let rows = '';
-  if (gameState._htWinner) rows += `<div class="score-row"><span>🏆 Highest Trump (${trump})</span><span class="val">${gameState[gameState._htWinner]||'?'} +1</span></div>`;
-  if (gameState._ltWinner) rows += `<div class="score-row"><span>🔻 Lowest Trump (${trump})</span><span class="val">${gameState[gameState._ltWinner]||'?'} +1</span></div>`;
-  if (gameState.jackCaptured) rows += `<div class="score-row"><span>🃏 Jack of Trump</span><span class="val">${gameState[gameState.jackCaptured]||'?'} +1</span></div>`;
-  if (gameState._gpWinner) rows += `<div class="score-row"><span>🎯 Game Points</span><span class="val">${gameState[gameState._gpWinner]||'?'} +1</span></div>`;
-
-  document.getElementById('scoreBD').innerHTML = rows;
-  document.getElementById('resultTitle').textContent = gameState.phase === 'game_over'
-    ? (gameState.scores[me] >= 11 ? '🎉 You Win!' : '😔 You Lose')
-    : 'Round Complete';
-  document.getElementById('totalLine').textContent = `Score — You: ${gameState.scores[me]}  ·  Opp: ${gameState.scores[opp]}`;
-
-  const btn = document.querySelector('#resultModal .action-btn');
-  btn.textContent = gameState.phase === 'game_over' ? 'Play Again' : 'Next Round →';
-  btn.style.display = (isMyTurn() || gameState.dealer === myRole) ? '' : 'none';
-
+function showResult(){
+  const mt=teamOf(myRole,state.teams);
+  document.getElementById('scoreBD').innerHTML=(state.roundBreakdown||[]).map(b=>`<div class="sc-row"><span>${b.label}</span><span class="v">${b.val}</span></div>`).join('');
+  document.getElementById('resultTitle').textContent=state.phase==='game_over'?(state.scores[mt]>=14?'🎉 Your Team Wins!':'😔 You Lost'):'Round Over';
+  document.getElementById('totalLine').textContent=`Team A: ${state.scores.A} · Team B: ${state.scores.B} · First to 14`;
+  const btn=document.getElementById('nextBtn');
+  btn.textContent=state.phase==='game_over'?'Play Again':'Next Round →';
+  btn.style.display=(myRole===state.dealer||state.phase==='game_over')?'':'none';
   document.getElementById('resultModal').classList.add('open');
 }
-
-function nextRound() {
+function nextRound(){
   document.getElementById('resultModal').classList.remove('open');
-  if (gameState.phase === 'game_over') {
-    gameState.scores = {host:0, guest:0};
-    gameState.round = 0;
-    gameState.dealer = 'host';
-  }
-  gameState.phase = 'dealing';
-  saveState();
-  setTimeout(() => dealRound(), 400);
+  if(state.phase==='game_over'){state.scores={A:0,B:0};state.round=0;state.dealer='p0';}
+  dealRound();
 }
 </script>
 </body>
