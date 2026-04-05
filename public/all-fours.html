@@ -66,6 +66,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 /* GAME TABLE */
 #gameScreen{
   display:none;flex-direction:column;width:100%;height:100%;padding:0;overflow:hidden;
+  position:relative;
   background:var(--table);
   background-image:radial-gradient(ellipse at 50% 35%,var(--table-mid) 0%,var(--table) 55%,var(--table-dark) 100%);
 }
@@ -200,14 +201,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 .abtn2.wide{width:100%;padding:12px;margin-top:10px;}
 .abtn2:hover{filter:brightness(1.15);transform:translateY(-1px);}
 
-/* Inline action box — sits inside the status bar area, never overlaps hand */
-.inlineact{display:none;flex-direction:column;align-items:center;gap:6px;
-  background:rgba(0,0,0,.55);border:1px solid rgba(240,192,64,.25);
-  border-radius:14px;padding:10px 16px;width:100%;}
-.inlineact.show{display:flex;}
-.inlineact-title{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;}
-.inlineact-sub{color:rgba(255,255,255,.5);font-size:.76rem;font-style:italic;text-align:center;}
-.inlineact-btns{display:flex;gap:8px;justify-content:center;}
+/* Centered transparent beg/dealer popup — floats over the table, doesn't block hand */
+.floatpop{display:none;position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-60%);z-index:150;
+  background:rgba(18,8,46,.82);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(240,192,64,.35);border-radius:18px;
+  padding:18px 24px 16px;text-align:center;
+  min-width:240px;max-width:80vw;
+  box-shadow:0 8px 40px rgba(0,0,0,.6);}
+.floatpop.show{display:block;}
+.floatpop-title{font-family:'Playfair Display',serif;color:var(--gold);
+  font-size:1.15rem;margin-bottom:5px;}
+.floatpop-sub{color:rgba(255,255,255,.55);font-size:.78rem;
+  font-style:italic;margin-bottom:12px;line-height:1.4;}
+.floatpop-btns{display:flex;gap:8px;justify-content:center;}
+
+/* NR card back */
+.nr-card{width:60px;height:86px;border-radius:8px;
+  background:linear-gradient(135deg,#2d0a6e,#5b2fc9);
+  border:2px solid rgba(255,255,255,.2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex-shrink:0;box-shadow:2px 4px 10px rgba(0,0,0,.55);
+  position:relative;overflow:hidden;}
+.nr-card::before{content:'';position:absolute;inset:4px;
+  border:1px solid rgba(255,255,255,.15);border-radius:5px;}
+.nr-logo{font-family:'Playfair Display',serif;font-size:1.1rem;
+  font-weight:900;color:rgba(255,255,255,.75);letter-spacing:.05em;
+  text-shadow:0 1px 6px rgba(0,0,0,.5);line-height:1;}
+.nr-sub{font-size:.45rem;color:rgba(255,255,255,.35);
+  letter-spacing:.15em;text-transform:uppercase;margin-top:2px;}
 
 /* Summary rows */
 .srow{display:flex;justify-content:space-between;padding:5px 0;
@@ -313,15 +336,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
       <!-- Trick grid -->
       <div class="trickgrid" id="trickGrid"></div>
 
-      <!-- Status + inline actions -->
+      <!-- Status -->
       <div class="cbot">
         <div class="statusbar" id="statusBar">Loading...</div>
-        <!-- Inline beg/dealer actions — appear here, NEVER overlap the hand -->
-        <div class="inlineact" id="inlineAct">
-          <div class="inlineact-title" id="inlineTitle"></div>
-          <div class="inlineact-sub" id="inlineSub"></div>
-          <div class="inlineact-btns" id="inlineBtns"></div>
-        </div>
       </div>
     </div>
 
@@ -347,6 +364,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
   <div class="handarea">
     <div class="mylbl" id="myLbl">Your Hand</div>
     <div class="handscroll" id="myHand"></div>
+  </div>
+
+  <!-- Floating beg/dealer popup — centered on table, transparent, doesn't block hand -->
+  <div class="floatpop" id="floatPop">
+    <div class="floatpop-title" id="floatTitle"></div>
+    <div class="floatpop-sub" id="floatSub"></div>
+    <div class="floatpop-btns" id="floatBtns"></div>
   </div>
 
 </div><!-- #gameScreen -->
@@ -404,6 +428,7 @@ function connect(cb){
   ws.onclose=()=>{if(state&&state.phase!=='lobby')toast('Disconnected — refresh to rejoin',4000);};
 }
 function send(obj){if(ws&&ws.readyState===1)ws.send(JSON.stringify(obj));}
+function closeAllPopups(){hideFloatPop();}
 
 function handleMsg(msg){
   switch(msg.type){
@@ -656,7 +681,8 @@ function renderHand(canSee=true){
     const count=(state.hands[myRole]||[]).length;
     hs.className='handscroll';
     hs.innerHTML=Array(count).fill(0).map(()=>
-      `<div class="lockcard">🔒</div>`).join('');
+      `<div class="nr-card"><div class="nr-logo">NR</div><div class="nr-sub">All Fours</div></div>`
+    ).join('');
     return;
   }
   const cards=localOrder||state.hands[myRole]||[];
@@ -701,23 +727,22 @@ function renderStatus(beggor){
   if(ph==='game_over'){const w=state.scores.A>=14?'A':'B';bar.textContent=`Game over! Team ${w} wins! 🎉`;}
 }
 
-function showInlineAction(title, sub, btns){
-  const el=document.getElementById('inlineAct');
-  document.getElementById('inlineTitle').textContent=title;
-  document.getElementById('inlineSub').textContent=sub;
-  document.getElementById('inlineBtns').innerHTML=btns;
-  el.classList.add('show');
+function showFloatPop(title, sub, btns){
+  document.getElementById('floatTitle').textContent=title;
+  document.getElementById('floatSub').textContent=sub;
+  document.getElementById('floatBtns').innerHTML=btns;
+  document.getElementById('floatPop').classList.add('show');
 }
-function hideInlineAction(){
-  document.getElementById('inlineAct').classList.remove('show');
+function hideFloatPop(){
+  document.getElementById('floatPop').classList.remove('show');
 }
 
 function handlePhaseUI(){
-  hideInlineAction();
+  hideFloatPop();
   const di=ROLES.indexOf(state.dealer);
   const beggor=ROLES[(di+1)%4];
   if(state.phase==='bet'&&myRole===beggor){
-    showInlineAction(
+    showFloatPop(
       'Beg or Stand?',
       `Trump is ${state.trumpSuit||'?'} — Beg for more cards or Stand to play`,
       `<button class="abtn2 gold" onclick="doBeg()">🙏 Beg</button>
@@ -726,7 +751,7 @@ function handlePhaseUI(){
     return;
   }
   if(state.phase==='dealer_choice'&&state.turn===myRole){
-    showInlineAction(
+    showFloatPop(
       'Give or Run the Pack?',
       `${state[state.bettor]||'Opponent'} is begging`,
       `<button class="abtn2 blue" onclick="doGive()">Give (+1)</button>
@@ -740,21 +765,21 @@ function handlePhaseUI(){
 
 // Beg actions
 function doBeg(){
-  hideInlineAction();
+  hideFloatPop();
   const di=ROLES.indexOf(state.dealer);
   if(myRole!==ROLES[(di+1)%4])return;
   state.bettor=myRole;state.phase='dealer_choice';state.turn=state.dealer;
   send({type:'update',state});
 }
 function doStand(){
-  hideInlineAction();
+  hideFloatPop();
   const di=ROLES.indexOf(state.dealer);
   if(myRole!==ROLES[(di+1)%4])return;
   state.phase='playing';state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
 }
 function doGive(){
-  hideInlineAction();
+  hideFloatPop();
   if(state.turn!==myRole)return;
   const bt=teamOf(state.bettor,state.teams);
   state.scores[bt]=(state.scores[bt]||0)+1;
@@ -764,7 +789,7 @@ function doGive(){
   send({type:'update',state});
 }
 function doRunPack(){
-  hideInlineAction();
+  hideFloatPop();
   if(state.turn!==myRole)return;
   runThePack();
 }
