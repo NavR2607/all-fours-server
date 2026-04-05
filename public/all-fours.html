@@ -91,8 +91,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'In
 /* ── TABLE AREA ── */
 .table-area{
   flex:1;min-height:0;position:relative;
-  background:#2d8a4e;
-  background-image:radial-gradient(ellipse at 50% 40%,#3aad64 0%,#2d8a4e 55%,#1e6b38 100%);
+  background:#2d1b5e;
+  background-image:radial-gradient(ellipse at 50% 40%,#3a2275 0%,#2d1b5e 55%,#1a0f3a 100%);
   overflow:hidden;
 }
 
@@ -756,16 +756,26 @@ function renderHand(canSee=true){
   if(!state||!state.hands)return;
   const hc=document.getElementById('handCards');
   const rawHand=state.hands[myRole]||[];
-  if(!canSee){
-    hc.innerHTML=rawHand.map(()=>nrBack(68,98)).join('');
+
+  // ALWAYS show real cards if phase is playing or round_end or game_over
+  // Only lock during bet/dealer_choice for non-involved players
+  const forceShow=['playing','round_end','game_over'].includes(state.phase);
+
+  if(!canSee&&!forceShow){
+    // Show NR backs — count ALL cards including hidden placeholders
+    const count=rawHand.length;
+    hc.innerHTML=Array(count).fill(0).map(()=>nrBack(68,98)).join('');
     return;
   }
-  const cards=localOrder||rawHand;
+
+  // Show real cards — filter out hidden placeholders from server
+  const realCards=rawHand.filter(c=>c&&!c.hidden);
+  const cards=localOrder&&localOrder.every(c=>!c.hidden)?localOrder:realCards;
   const canPlay=isMyTurn()&&state.phase==='playing';
   hc.innerHTML=cards.map(c=>{
-    if(!c||c.hidden)return nrBack(68,98);
-    const ri=rawHand.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
-    const ok=canPlay&&canPlayCard(c,rawHand);
+    if(!c||c.hidden)return''; // skip any remaining hidden ones
+    const ri=realCards.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
+    const ok=canPlay&&canPlayCard(c,realCards);
     const isTrump=state.trumpSuit&&c.suit===state.trumpSuit;
     return`<div class="card ${SC[c.suit]} ${ok?'playable':''} ${isTrump?'trumpc':''}" onclick="${ok?`playCard(${ri})`:''}" style="width:68px;height:98px;">
       <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>
@@ -855,17 +865,23 @@ function doRunPack(){
 function canPlayCard(card,hand){
   const trump=state.trumpSuit,led=state.ledSuit;
   if(!led)return true;
-  const hasSuit=hand.some(c=>!c.hidden&&c.suit===led&&c.suit!==trump);
+  const realHand=hand.filter(c=>c&&!c.hidden);
+  const hasSuit=realHand.some(c=>c.suit===led&&c.suit!==trump);
   if(hasSuit)return card.suit===led;
   return true;
 }
 function playCard(idx){
   if(!isMyTurn()||state.phase!=='playing')return;
-  const hand=[...(state.hands[myRole]||[])];
-  const card=hand[idx];
-  if(!card||card.hidden)return;
-  if(!canPlayCard(card,hand)){toast('You must follow suit!');return;}
-  hand.splice(idx,1);state.hands[myRole]=hand;
+  const rawHand=state.hands[myRole]||[];
+  const realHand=rawHand.filter(c=>c&&!c.hidden);
+  const card=realHand[idx];
+  if(!card)return;
+  if(!canPlayCard(card,realHand)){toast('You must follow suit!');return;}
+  // Remove from raw hand
+  const rawIdx=rawHand.findIndex(rc=>rc.rank===card.rank&&rc.suit===card.suit);
+  const newHand=[...rawHand];
+  newHand.splice(rawIdx,1);
+  state.hands[myRole]=newHand;
   state.trickCard[myRole]=card;
   if(!state.ledSuit)state.ledSuit=card.suit;
   localOrder=null;
@@ -881,7 +897,8 @@ function resolveTrick(){
   ROLES.forEach(r=>{const c=state.trickCard[r];if(c.rank==='J'&&c.suit===trump)state.jackCaptured=winner;});
   ROLES.forEach(r=>{state.gamePoints[r]=(state.gamePoints[r]||0)+gv(state.trickCard[r]);});
   state.trickCard={p0:null,p1:null,p2:null,p3:null};state.ledSuit=null;
-  const done=ROLES.every(r=>(state.hands[r]||[]).length===0);
+  // Check if all real cards are played (filter hidden placeholders)
+  const done=ROLES.every(r=>(state.hands[r]||[]).filter(c=>c&&!c.hidden).length===0);
   if(done)scoreRound();
   else{state.turn=winner;send({type:'update',state});}
 }
