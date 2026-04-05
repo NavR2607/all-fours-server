@@ -222,19 +222,49 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 .card.black .c-rank,.card.black .c-suit,.card.black .c-mid{color:#111;}
 
 /* ══ MODALS ══ */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
-  z-index:200;align-items:flex-end;justify-content:center;padding-bottom:0;}
+/* Center modals (summary, game over) — full dark overlay */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
+  z-index:200;align-items:center;justify-content:center;}
 .modal.open{display:flex;}
-/* Beg and dealer modals slide up from bottom so cards still visible above */
-.modal.bottom-sheet .modal-box{
-  border-radius:18px 18px 0 0;max-width:100%;width:100%;margin:0;
-  padding:20px 24px 28px;
+
+/* Bottom-sheet modals (beg, dealer) — sit ABOVE the hand, don't cover it */
+/* They anchor to the bottom of the table-body, NOT the whole screen */
+.modal.bottom-sheet{
+  position:fixed;
+  left:0;right:0;
+  /* sits just above the bottom-bar + hand-area — approx 160px from bottom */
+  bottom:0;top:auto;
+  height:auto;
+  background:transparent;
+  align-items:flex-end;
+  z-index:150;
 }
+.modal.bottom-sheet .modal-box{
+  width:100%;max-width:100%;
+  border-radius:18px 18px 0 0;
+  padding:18px 24px 24px;
+  margin:0;
+  background:linear-gradient(180deg,#0d1e30,#081422);
+  border:1px solid rgba(240,192,64,.3);
+  border-bottom:none;
+  box-shadow:0 -8px 30px rgba(0,0,0,.6);
+}
+/* Dim overlay behind bottom sheet but NOT over the hand */
+.modal.bottom-sheet::before{
+  content:'';
+  position:fixed;
+  left:0;right:0;top:0;
+  /* Only dim down to just above the hand area */
+  bottom:160px;
+  background:rgba(0,0,0,.35);
+  z-index:-1;
+}
+
 .modal-box{background:linear-gradient(160deg,#1a2a3a,#0a1520);
   border:1px solid rgba(240,192,64,.35);border-radius:18px;
-  padding:24px;max-width:320px;width:92%;text-align:center;}
-.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.4rem;margin-bottom:8px;}
-.modal-box p{color:rgba(255,255,255,.6);font-size:.88rem;margin-bottom:18px;font-style:italic;line-height:1.5;}
+  padding:24px;max-width:340px;width:92%;text-align:center;}
+.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.3rem;margin-bottom:6px;}
+.modal-box p{color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:14px;font-style:italic;line-height:1.5;}
 .modal-btns{display:flex;gap:10px;justify-content:center;}
 .act-btn{padding:10px 22px;border:none;border-radius:9px;
   font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.03em;}
@@ -243,8 +273,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 .act-btn.blue{background:#1a4a7a;color:#fff;}
 .act-btn.wide{width:100%;padding:12px;margin-top:10px;}
 .act-btn:hover{filter:brightness(1.15);transform:translateY(-1px);}
-/* Summary / gameover still use centered full overlay */
-.modal.center-modal{align-items:center;background:rgba(0,0,0,.78);}
 
 /* Summary rows */
 .sum-row{display:flex;justify-content:space-between;padding:6px 0;
@@ -326,14 +354,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
       <div class="ts-label">Team A</div>
       <div class="ts-row">
         <div class="ts-pts ta" id="scoreA">0</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.35)">/ 14</div>
       </div>
       <div class="ts-sub">Games: <span id="gameA">0</span></div>
     </div>
     <div class="team-score right">
       <div class="ts-label">Team B</div>
       <div class="ts-row" style="justify-content:flex-end;">
-        <div style="font-size:.7rem;color:rgba(255,255,255,.35)">/ 14</div>
         <div class="ts-pts tb" id="scoreB">0</div>
       </div>
       <div class="ts-sub">Games: <span id="gameB">0</span></div>
@@ -632,6 +658,13 @@ function renderGame(){
   const me=myRole,myIdx=ROLES.indexOf(me);
   const rR=ROLES[(myIdx+1)%4],tR=ROLES[(myIdx+2)%4],lR=ROLES[(myIdx+3)%4];
 
+  // During bet/dealer_choice phase, only the beggar and dealer can see their cards
+  // Everyone else's hand stays locked
+  const begPhase = state.phase==='bet'||state.phase==='dealer_choice';
+  const di=ROLES.indexOf(state.dealer);
+  const beggor=ROLES[(di+1)%4]; // player to right of dealer begs
+  const canSeeMyHand = !begPhase || me===beggor || me===state.dealer;
+
   // Scores
   document.getElementById('scoreA').textContent=state.scores.A||0;
   document.getElementById('scoreB').textContent=state.scores.B||0;
@@ -691,7 +724,7 @@ function renderGame(){
   const isMeDealer=state.dealer===myRole;
   document.getElementById('myLabel').textContent=`${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}${isMeDealer?' · DEALER':''}`;
 
-  renderHand();
+  renderHand(canSeeMyHand);
 }
 
 function renderTrickGrid(me,tR,lR,rR){
@@ -716,13 +749,24 @@ function buildCardHtml(c,extra=''){
   return`<div class="card ${col} ${extra}"><div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div><div class="c-mid">${c.suit}</div><div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
 }
 
-function renderHand(){
+function renderHand(canSee=true){
   if(!state||!state.hands)return;
+  const hs=document.getElementById('myHand');
+  // If cards are locked during beg phase, show face-down cards with a message
+  if(!canSee){
+    const count=(state.hands[myRole]||[]).length;
+    hs.className='hand-scroll';
+    hs.innerHTML=Array(count).fill(0).map(()=>
+      `<div style="width:var(--card-w);height:var(--card-h);border-radius:8px;
+        background:linear-gradient(135deg,#1a237e,#283593);border:2px solid rgba(255,255,255,.15);
+        display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;
+        box-shadow:2px 4px 8px rgba(0,0,0,.5);">🔒</div>`
+    ).join('');
+    return;
+  }
   const myCards=localHandOrder||state.hands[myRole]||[];
   const realHand=state.hands[myRole]||[];
   const canPlay=isMyTurn()&&state.phase==='playing';
-  const hs=document.getElementById('myHand');
-  // Add 'many' class if more than 7 cards
   hs.className='hand-scroll'+(myCards.length>7?' many':'');
   hs.innerHTML=myCards.map((c)=>{
     if(c.hidden)return'';
@@ -741,8 +785,20 @@ function isMyTurn(){return state&&state.turn===myRole;}
 function renderStatus(){
   const bar=document.getElementById('statusBar');
   const ph=state.phase,mt=isMyTurn(),tn=state[state.turn]||'?';
-  if(ph==='bet'){bar.textContent=mt?'Your turn — see popup below':'Waiting for '+tn+' to beg or stand...';return;}
-  if(ph==='dealer_choice'){bar.textContent=state.turn===myRole?'Your turn — see popup below':`${tn} (dealer) deciding...`;return;}
+  if(ph==='bet'){
+    const di2=ROLES.indexOf(state.dealer);
+    const beggor=ROLES[(di2+1)%4];
+    if(myRole===beggor) bar.textContent='Your turn — see popup below';
+    else if(myRole===state.dealer) bar.textContent=`Waiting for ${state[beggor]||'?'} to beg or stand...`;
+    else bar.textContent='Waiting — cards locked until beg is resolved';
+    return;
+  }
+  if(ph==='dealer_choice'){
+    if(state.turn===myRole) bar.textContent='Your turn — see popup below';
+    else if(myRole===ROLES[(ROLES.indexOf(state.dealer)+1)%4]) bar.textContent='Waiting for dealer to decide...';
+    else bar.textContent='Waiting — cards locked until dealer decides';
+    return;
+  }
   if(ph==='playing'){
     const myT=teamOf(myRole,state.teams);
     const tt=(state.teams&&state.teams[myT]||[]).reduce((s,r)=>s+(state.trickWins[r]||0),0);
