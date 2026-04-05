@@ -2,472 +2,390 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>All Fours — Trinidad</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#1a1a2e;--table:#1a4a8a;--table-dark:#0d2d5e;
-  --header:#0a0f1e;--gold:#f0c040;--cream:#fff8ee;
-  --teamA:#4a90d9;--teamB:#e05555;
-  --card-w:64px;--card-h:92px;
-  --card-sm-w:52px;--card-sm-h:74px;
+  --table:#2d1b5e;--table-mid:#3a2275;--table-dark:#1a0f3a;
+  --header:#120a2e;--gold:#f0c040;--cream:#fff8ee;
+  --teamA:#5ba3f5;--teamB:#f05555;
+  --card-w:64px;--card-h:92px;--card-sm-w:50px;--card-sm-h:72px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 #app{width:100vw;height:100vh;display:flex;flex-direction:column;font-family:'Inter',sans-serif;}
 
-/* ══ SCREENS ══ */
+/* SCREENS */
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;
   width:100%;height:100%;padding:16px;overflow-y:auto;background:var(--header);}
 .screen.active{display:flex;}
 
-/* Lobby */
-.lobby-logo{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;
-  color:var(--gold);text-shadow:2px 4px 0 rgba(0,0,0,.5);text-align:center;margin-bottom:4px;}
-.lobby-sub{color:rgba(255,255,255,.4);font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px;}
-.lobby-panel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+/* LOBBY */
+.logo{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;
+  color:var(--gold);text-shadow:2px 4px 0 rgba(0,0,0,.6);text-align:center;margin-bottom:4px;}
+.sub{color:rgba(255,255,255,.4);font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px;}
+.panel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
   border-radius:16px;padding:24px;width:100%;max-width:360px;}
-.l-input{width:100%;padding:12px 14px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);
+.inp{width:100%;padding:12px 14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
   border-radius:10px;color:#fff;font-size:1rem;outline:none;margin-bottom:10px;}
-.l-input:focus{border-color:var(--gold);}
-.l-input::placeholder{color:rgba(255,255,255,.3);}
-.l-input.code{text-align:center;font-size:1.8rem;letter-spacing:.4em;
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:rgba(255,255,255,.3);}
+.inp.code{text-align:center;font-size:1.8rem;letter-spacing:.4em;
   font-family:'Playfair Display',serif;text-transform:uppercase;}
-.l-btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:1rem;
-  font-weight:700;cursor:pointer;transition:all .18s;}
-.l-btn.primary{background:var(--gold);color:#111;}
-.l-btn.primary:hover{filter:brightness(1.1);}
-.l-btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);margin-top:8px;}
-.l-btn.ghost:hover{background:rgba(255,255,255,.14);}
-.l-btn:disabled{opacity:.4;cursor:not-allowed;}
-.divider{text-align:center;color:rgba(255,255,255,.25);font-size:.8rem;margin:14px 0;}
+.lbtn{width:100%;padding:13px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .18s;}
+.lbtn.pri{background:var(--gold);color:#111;}.lbtn.pri:hover{filter:brightness(1.1);}
+.lbtn.gho{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);margin-top:8px;}
+.lbtn.gho:hover{background:rgba(255,255,255,.14);}
+.lbtn:disabled{opacity:.4;cursor:not-allowed;}
+.div{text-align:center;color:rgba(255,255,255,.25);font-size:.8rem;margin:14px 0;}
 
-/* Waiting */
-.code-display{text-align:center;padding:16px;background:rgba(240,192,64,.1);
+/* WAITING */
+.codebox{text-align:center;padding:16px;background:rgba(240,192,64,.1);
   border:2px dashed rgba(240,192,64,.4);border-radius:14px;margin:14px 0;width:100%;max-width:360px;}
-.code-big{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;
-  color:var(--gold);letter-spacing:.35em;}
-.code-hint{font-size:.72rem;color:rgba(255,255,255,.35);text-transform:uppercase;
-  letter-spacing:.15em;margin-top:4px;cursor:pointer;}
-.p-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px;margin:12px 0;}
-.p-slot{background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);
+.codebig{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);letter-spacing:.35em;}
+.codehint{font-size:.72rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.15em;margin-top:4px;cursor:pointer;}
+.pslots{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px;margin:12px 0;}
+.pslot{background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);
   border-radius:10px;padding:10px 12px;min-height:50px;display:flex;flex-direction:column;justify-content:center;}
-.p-slot.filled{border-style:solid;border-color:rgba(240,192,64,.3);}
-.slot-n{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.35);margin-bottom:2px;}
-.slot-name{font-weight:700;font-size:.95rem;color:var(--gold);}
-.slot-team{font-size:.7rem;margin-top:2px;}
+.pslot.filled{border-style:solid;border-color:rgba(240,192,64,.3);}
+.slotn{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.35);margin-bottom:2px;}
+.slotnm{font-weight:700;font-size:.95rem;color:var(--gold);}
+.slott{font-size:.7rem;margin-top:2px;}
 .ta{color:var(--teamA);}.tb{color:var(--teamB);}
-.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px;margin:12px 0;}
-.team-col{background:rgba(0,0,0,.25);border-radius:12px;padding:12px;}
-.team-col h4{font-size:.9rem;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08);}
-.team-col.ta h4{color:var(--teamA);}.team-col.tb h4{color:var(--teamB);}
-.a-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.85rem;}
-.a-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;}
-.a-btn{padding:3px 9px;border:none;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;}
-.a-btn.to-a{background:rgba(74,144,217,.25);color:var(--teamA);border:1px solid rgba(74,144,217,.4);}
-.a-btn.to-b{background:rgba(224,85,85,.25);color:var(--teamB);border:1px solid rgba(224,85,85,.4);}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px;margin:12px 0;}
+.tcol{background:rgba(0,0,0,.25);border-radius:12px;padding:12px;}
+.tcol h4{font-size:.9rem;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08);}
+.tcol.ta h4{color:var(--teamA);}.tcol.tb h4{color:var(--teamB);}
+.arow{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.85rem;}
+.anm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;}
+.abtn{padding:3px 9px;border:none;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;}
+.abtn.toa{background:rgba(91,163,245,.2);color:var(--teamA);border:1px solid rgba(91,163,245,.35);}
+.abtn.tob{background:rgba(240,85,85,.2);color:var(--teamB);border:1px solid rgba(240,85,85,.35);}
 
-/* ══ GAME TABLE ══ */
+/* GAME TABLE */
 #gameScreen{
   display:none;flex-direction:column;width:100%;height:100%;padding:0;overflow:hidden;
   background:var(--table);
-  background-image:radial-gradient(ellipse at 50% 40%,#2a6abf 0%,var(--table) 55%,var(--table-dark) 100%);
+  background-image:radial-gradient(ellipse at 50% 35%,var(--table-mid) 0%,var(--table) 55%,var(--table-dark) 100%);
 }
 #gameScreen.active{display:flex;}
 
-/* Header */
-.g-header{
-  display:grid;grid-template-columns:1fr 1fr;
-  background:var(--header);padding:6px 14px;flex-shrink:0;
-  border-bottom:2px solid rgba(240,192,64,.2);min-height:60px;
-}
-.team-score{display:flex;flex-direction:column;justify-content:center;}
-.team-score.left{align-items:flex-start;}
-.team-score.right{align-items:flex-end;}
-.ts-row{display:flex;align-items:baseline;gap:8px;}
-.ts-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.45);}
-.ts-pts{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;line-height:1;}
-.ts-pts.ta{color:var(--teamA);}.ts-pts.tb{color:var(--teamB);}
-.ts-sub{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:1px;}
-.ts-sub span{font-weight:700;}
+/* Score header */
+.ghdr{display:grid;grid-template-columns:1fr 1fr;background:var(--header);
+  padding:6px 14px;flex-shrink:0;border-bottom:2px solid rgba(240,192,64,.2);min-height:58px;}
+.tscore{display:flex;flex-direction:column;justify-content:center;}
+.tscore.L{align-items:flex-start;}.tscore.R{align-items:flex-end;}
+.tslbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.4);}
+.tspts{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;line-height:1;}
+.tspts.ta{color:var(--teamA);}.tspts.tb{color:var(--teamB);}
+.tssub{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:1px;}
 
-/* Table body — 3 columns: left-opp | center | right-opp */
-.table-body{
-  flex:1;min-height:0;
-  display:grid;
-  grid-template-columns:54px 1fr 54px;
-  padding:4px 0;
-}
+/* Table body */
+.tbody{flex:1;min-height:0;display:grid;grid-template-columns:52px 1fr 52px;padding:3px 0;}
 
-/* Side opponents */
-.side-opp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:4px 2px;}
-.side-avatar{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.35);
-  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+/* Side opps */
+.sideopp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:3px 2px;}
+.savatar{width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
   border:2px solid rgba(255,255,255,.15);}
-.side-avatar.turn{border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,.6);}
-.side-name{font-size:.55rem;color:rgba(255,255,255,.65);text-align:center;max-width:50px;
+.savatar.turn{border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,.6);}
+.snm{font-size:.52rem;color:rgba(255,255,255,.6);text-align:center;max-width:48px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.side-dealer{font-size:.5rem;background:var(--gold);color:#111;border-radius:4px;
-  padding:1px 4px;font-weight:700;margin-top:-2px;}
-.side-cards-v{display:flex;flex-direction:column;gap:3px;}
-.mini-card-h{width:30px;height:17px;border-radius:2px;
-  background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,.2);}
+.sdlr{font-size:.48rem;background:var(--gold);color:#111;border-radius:3px;padding:1px 3px;font-weight:700;}
+.scards{display:flex;flex-direction:column;gap:2px;}
+.minih{width:28px;height:15px;border-radius:2px;
+  background:linear-gradient(135deg,#3d1d8c,#5b2fc9);border:1px solid rgba(255,255,255,.2);}
 
 /* Center panel */
-.center-panel{
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  gap:4px;padding:4px 6px;min-height:0;
-}
+.cpanel{display:grid;grid-template-rows:auto 1fr auto;gap:3px;padding:3px 5px;min-height:0;}
 
-/* Top row of center: kick card left + top opponent right */
-.center-top{display:flex;align-items:flex-start;gap:8px;padding:2px 0;}
-
-/* Kick card area */
-.kick-area{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
-.kick-label{font-size:.58rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;}
-.kick-bonus-tag{background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);
-  border-radius:10px;padding:2px 7px;font-size:.65rem;color:var(--gold);white-space:nowrap;}
-
-/* Top opponent */
-.opp-top-box{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.opp-avatar{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+/* Top: kick card + top opp */
+.ctop{display:flex;align-items:flex-start;gap:8px;padding:2px 0;}
+.kickarea{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.kicklbl{font-size:.55rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;}
+.kicktag{background:rgba(240,192,64,.18);border:1px solid rgba(240,192,64,.4);
+  border-radius:10px;padding:2px 7px;font-size:.62rem;color:var(--gold);white-space:nowrap;margin-top:1px;}
+.oppbox{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.oppavatar{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.3);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
   border:2px solid rgba(255,255,255,.15);}
-.opp-avatar.turn{border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,.5);}
-.opp-name{font-size:.65rem;color:rgba(255,255,255,.75);text-align:center;}
-.opp-dealer{font-size:.55rem;background:var(--gold);color:#111;border-radius:4px;
-  padding:1px 5px;font-weight:700;}
-.mini-hand{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;}
-.mini-card{width:13px;height:20px;border-radius:2px;
-  background:linear-gradient(135deg,#1a237e,#283593);border:1px solid rgba(255,255,255,.2);}
+.oppavatar.turn{border-color:var(--gold);box-shadow:0 0 8px rgba(240,192,64,.5);}
+.oppnm{font-size:.62rem;color:rgba(255,255,255,.75);text-align:center;}
+.oppdlr{font-size:.52rem;background:var(--gold);color:#111;border-radius:3px;padding:1px 5px;font-weight:700;}
+.minihand{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;}
+.minic{width:12px;height:19px;border-radius:2px;
+  background:linear-gradient(135deg,#3d1d8c,#5b2fc9);border:1px solid rgba(255,255,255,.2);}
 
-/* Trick area — center of table */
-.trick-area{
-  display:grid;
-  grid-template-columns:1fr 70px 1fr;
-  grid-template-rows:1fr 70px 1fr;
-  gap:4px;align-items:center;justify-items:center;
-}
-.t-slot{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.t-slot-empty{border-radius:7px;border:1.5px dashed rgba(255,255,255,.18);
-  background:rgba(0,0,0,.12);width:var(--card-sm-w);height:var(--card-sm-h);}
-.t-name{font-size:.58rem;color:rgba(255,255,255,.4);text-align:center;}
-.t-center-icon{font-size:1rem;color:rgba(255,255,255,.18);}
+/* Trick grid */
+.trickgrid{display:grid;grid-template-columns:1fr 68px 1fr;
+  grid-template-rows:auto auto auto;gap:3px;align-items:center;justify-items:center;}
+.tslot{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tempty{border-radius:7px;border:1.5px dashed rgba(255,255,255,.15);
+  background:rgba(0,0,0,.1);width:var(--card-sm-w);height:var(--card-sm-h);}
+.tnm{font-size:.56rem;color:rgba(255,255,255,.38);text-align:center;}
+.ticon{font-size:.9rem;color:rgba(255,255,255,.15);}
 
-/* Bottom of center: status + actions */
-.center-bottom{display:flex;flex-direction:column;align-items:center;gap:5px;}
-.status-bar{background:rgba(0,0,0,.4);border-radius:16px;padding:4px 14px;
-  font-size:.78rem;color:var(--gold);text-align:center;font-style:italic;width:100%;}
+/* Status */
+.cbot{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.statusbar{background:rgba(0,0,0,.45);border-radius:16px;padding:4px 14px;
+  font-size:.76rem;color:var(--gold);text-align:center;font-style:italic;width:100%;}
 
 /* Bottom bar */
-.bottom-bar{background:rgba(0,0,0,.55);padding:5px 10px;display:flex;
+.botbar{background:rgba(0,0,0,.6);padding:5px 10px;display:flex;
   align-items:center;justify-content:space-between;flex-shrink:0;gap:6px;}
-.sort-btn{padding:6px 14px;border:none;border-radius:8px;background:rgba(255,255,255,.1);
-  color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.18);}
-.sort-btn:hover{background:rgba(240,192,64,.2);border-color:var(--gold);color:var(--gold);}
-.game-counter{display:flex;gap:6px;align-items:center;}
-.gc-label{font-size:.62rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;}
-.gc-val{font-size:.9rem;font-weight:700;}
-.trump-pill{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.3);
+.sortbtn{padding:6px 14px;border:none;border-radius:8px;background:rgba(255,255,255,.1);
+  color:#fff;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.18);}
+.sortbtn:hover{background:rgba(240,192,64,.2);border-color:var(--gold);color:var(--gold);}
+.trumppill{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.3);
   border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;}
-.trump-icon{font-size:1.1rem;}
-.trump-text{font-size:.7rem;color:rgba(255,255,255,.6);}
+.trumpicon{font-size:1.1rem;}.trumptxt{font-size:.7rem;color:rgba(255,255,255,.55);}
+.gctr{display:flex;gap:5px;align-items:center;}
+.gclbl{font-size:.6rem;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.08em;}
+.gcval{font-size:.88rem;font-weight:700;}
 
-/* Hand */
-.hand-area{padding:4px 4px 6px;flex-shrink:0;background:rgba(0,0,0,.2);}
-.my-label{font-size:.6rem;color:rgba(255,255,255,.4);text-transform:uppercase;
-  letter-spacing:.12em;margin-bottom:3px;text-align:center;}
-.hand-scroll{
-  display:flex;justify-content:center;flex-wrap:nowrap;
-  overflow-x:auto;gap:3px;
-  padding:4px 4px 6px;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.hand-scroll::-webkit-scrollbar{display:none;}
-/* When too many cards, shrink them slightly */
-.hand-scroll.many .card{
-  width:52px;height:76px;
-}
-.hand-scroll.many .c-mid{font-size:1.4rem;}
-.hand-scroll.many .c-rank{font-size:.78rem;}
+/* Hand area */
+.handarea{padding:3px 4px 6px;flex-shrink:0;background:rgba(0,0,0,.25);}
+.mylbl{font-size:.58rem;color:rgba(255,255,255,.38);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:2px;text-align:center;}
+.handscroll{display:flex;justify-content:center;flex-wrap:nowrap;
+  overflow-x:auto;gap:3px;padding:2px 4px 4px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.handscroll::-webkit-scrollbar{display:none;}
+.handscroll.many .card{width:50px;height:72px;}
+.handscroll.many .cmid{font-size:1.3rem;}
+.handscroll.many .crank{font-size:.76rem;}
+.handscroll.many .csuit{font-size:.64rem;}
 
-/* Cards */
-.card{
-  width:var(--card-w);height:var(--card-h);
-  border-radius:8px;background:#fff;border:1.5px solid #ccc;
-  display:flex;flex-direction:column;padding:3px 4px 2px;
-  cursor:default;box-shadow:2px 4px 8px rgba(0,0,0,.5);
-  transition:transform .15s,box-shadow .15s;
-  position:relative;user-select:none;flex-shrink:0;
-}
-.card.playable{cursor:pointer;border-color:#f0c040;
-  box-shadow:2px 4px 8px rgba(0,0,0,.4),0 0 0 2px rgba(240,192,64,.6);}
-.card.playable:active,.card.playable:hover{
-  transform:translateY(-10px);
-  box-shadow:3px 14px 20px rgba(0,0,0,.6),0 0 0 2px var(--gold);}
-.card.trump-c{border-color:#e74c3c;}
+/* CARDS */
+.card{width:var(--card-w);height:var(--card-h);border-radius:8px;background:#fff;
+  border:1.5px solid #ccc;display:flex;flex-direction:column;padding:3px 4px 2px;
+  cursor:default;box-shadow:2px 4px 10px rgba(0,0,0,.55);
+  transition:transform .15s,box-shadow .15s;user-select:none;flex-shrink:0;}
+.card.playable{cursor:pointer;border-color:var(--gold);
+  box-shadow:2px 4px 10px rgba(0,0,0,.45),0 0 0 2px rgba(240,192,64,.55);}
+.card.playable:active,.card.playable:hover{transform:translateY(-10px);
+  box-shadow:3px 14px 22px rgba(0,0,0,.65),0 0 0 2px var(--gold);}
+.card.trumpc{border-color:#e74c3c;}
 .card.sm{width:var(--card-sm-w);height:var(--card-sm-h);}
-.card.kick-size{width:58px;height:82px;}
-.c-top{display:flex;flex-direction:column;line-height:1.1;}
-.c-rank{font-size:.9rem;font-weight:900;font-family:'Playfair Display',serif;}
-.c-suit{font-size:.75rem;}
-.c-mid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
-.c-bot{transform:rotate(180deg);display:flex;flex-direction:column;line-height:1.1;}
-.card.sm .c-rank{font-size:.75rem;}.card.sm .c-mid{font-size:1.3rem;}.card.sm .c-suit{font-size:.65rem;}
-.card.kick-size .c-rank{font-size:.82rem;}.card.kick-size .c-mid{font-size:1.6rem;}
-.card.red .c-rank,.card.red .c-suit,.card.red .c-mid{color:#c0392b;}
-.card.black .c-rank,.card.black .c-suit,.card.black .c-mid{color:#111;}
+.card.kc{width:56px;height:80px;}
+.ctop2{display:flex;flex-direction:column;line-height:1.1;}
+.crank{font-size:.9rem;font-weight:900;font-family:'Playfair Display',serif;}
+.csuit{font-size:.75rem;}
+.cmid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
+.cbot2{transform:rotate(180deg);display:flex;flex-direction:column;line-height:1.1;}
+.card.sm .crank{font-size:.74rem;}.card.sm .cmid{font-size:1.25rem;}.card.sm .csuit{font-size:.64rem;}
+.card.kc .crank{font-size:.8rem;}.card.kc .cmid{font-size:1.55rem;}
+.card.red .crank,.card.red .csuit,.card.red .cmid{color:#c0392b;}
+.card.black .crank,.card.black .csuit,.card.black .cmid{color:#111;}
 
-/* ══ MODALS ══ */
-/* Center modals (summary, game over) — full dark overlay */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
-  z-index:200;align-items:center;justify-content:center;}
+/* MODALS — full screen dark for summary/gameover */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+  z-index:300;align-items:center;justify-content:center;}
 .modal.open{display:flex;}
+.mbox{background:linear-gradient(160deg,#221040,#100820);
+  border:1px solid rgba(240,192,64,.3);border-radius:18px;
+  padding:22px 24px;max-width:340px;width:92%;text-align:center;}
+.mbox h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.35rem;margin-bottom:7px;}
+.mbox p{color:rgba(255,255,255,.58);font-size:.85rem;margin-bottom:14px;font-style:italic;line-height:1.5;}
+.mbtns{display:flex;gap:10px;justify-content:center;}
+.abtn2{padding:10px 20px;border:none;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;}
+.abtn2.gold{background:var(--gold);color:#111;}
+.abtn2.red{background:#7b241c;color:#fff;}
+.abtn2.blue{background:#1a3a7a;color:#fff;}
+.abtn2.wide{width:100%;padding:12px;margin-top:10px;}
+.abtn2:hover{filter:brightness(1.15);transform:translateY(-1px);}
 
-/* Bottom-sheet modals (beg, dealer) — sit ABOVE the hand, don't cover it */
-/* They anchor to the bottom of the table-body, NOT the whole screen */
-.modal.bottom-sheet{
-  position:fixed;
-  left:0;right:0;
-  /* sits just above the bottom-bar + hand-area — approx 160px from bottom */
-  bottom:0;top:auto;
-  height:auto;
-  background:transparent;
-  align-items:flex-end;
-  z-index:150;
-}
-.modal.bottom-sheet .modal-box{
-  width:100%;max-width:100%;
-  border-radius:18px 18px 0 0;
-  padding:18px 24px 24px;
-  margin:0;
-  background:linear-gradient(180deg,#0d1e30,#081422);
-  border:1px solid rgba(240,192,64,.3);
-  border-bottom:none;
-  box-shadow:0 -8px 30px rgba(0,0,0,.6);
-}
-/* Dim overlay behind bottom sheet but NOT over the hand */
-.modal.bottom-sheet::before{
-  content:'';
-  position:fixed;
-  left:0;right:0;top:0;
-  /* Only dim down to just above the hand area */
-  bottom:160px;
-  background:rgba(0,0,0,.35);
-  z-index:-1;
-}
-
-.modal-box{background:linear-gradient(160deg,#1a2a3a,#0a1520);
-  border:1px solid rgba(240,192,64,.35);border-radius:18px;
-  padding:24px;max-width:340px;width:92%;text-align:center;}
-.modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.3rem;margin-bottom:6px;}
-.modal-box p{color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:14px;font-style:italic;line-height:1.5;}
-.modal-btns{display:flex;gap:10px;justify-content:center;}
-.act-btn{padding:10px 22px;border:none;border-radius:9px;
-  font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.03em;}
-.act-btn.gold{background:var(--gold);color:#111;}
-.act-btn.red{background:#7b241c;color:#fff;}
-.act-btn.blue{background:#1a4a7a;color:#fff;}
-.act-btn.wide{width:100%;padding:12px;margin-top:10px;}
-.act-btn:hover{filter:brightness(1.15);transform:translateY(-1px);}
+/* BEG / DEALER modals — slide up from bottom, DON'T cover hand */
+/* These are positioned as fixed bottom sheets that sit ABOVE the hand area */
+.bsheet{display:none;position:fixed;left:0;right:0;bottom:0;z-index:200;
+  flex-direction:column;align-items:stretch;}
+.bsheet.open{display:flex;}
+.bsheet-inner{background:linear-gradient(180deg,#1e0d45,#120830);
+  border:1px solid rgba(240,192,64,.3);border-top-left-radius:18px;border-top-right-radius:18px;
+  padding:16px 20px 20px;box-shadow:0 -8px 32px rgba(0,0,0,.7);}
+.bsheet-inner h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.25rem;margin-bottom:5px;}
+.bsheet-inner p{color:rgba(255,255,255,.58);font-size:.82rem;margin-bottom:14px;font-style:italic;line-height:1.4;}
+.bsheet-btns{display:flex;gap:10px;justify-content:center;}
 
 /* Summary rows */
-.sum-row{display:flex;justify-content:space-between;padding:6px 0;
+.srow{display:flex;justify-content:space-between;padding:5px 0;
   border-bottom:1px solid rgba(255,255,255,.07);font-size:.87rem;}
-.sum-row:last-child{border-bottom:none;}
-.sum-val{font-weight:700;}
-.sum-val.ta{color:var(--teamA);}.sum-val.tb{color:var(--teamB);}.sum-val.none{color:rgba(255,255,255,.3);}
-.sum-total{margin-top:12px;font-family:'Playfair Display',serif;font-size:.95rem;color:rgba(255,255,255,.8);}
+.srow:last-child{border-bottom:none;}
+.sval{font-weight:700;}
+.sval.ta{color:var(--teamA);}.sval.tb{color:var(--teamB);}.sval.none{color:rgba(255,255,255,.3);}
+.stotal{margin-top:10px;font-family:'Playfair Display',serif;font-size:.92rem;color:rgba(255,255,255,.75);}
+
+/* Locked hand card */
+.lockcard{width:var(--card-w);height:var(--card-h);border-radius:8px;
+  background:linear-gradient(135deg,#3d1d8c,#5b2fc9);border:2px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;
+  box-shadow:2px 4px 10px rgba(0,0,0,.55);}
 
 /* Toast */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.9);border:1px solid rgba(240,192,64,.4);color:#fff;
-  padding:8px 18px;border-radius:20px;font-size:.85rem;z-index:400;
+.toast{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.92);border:1px solid rgba(240,192,64,.4);color:#fff;
+  padding:7px 18px;border-radius:20px;font-size:.82rem;z-index:400;
   pointer-events:none;opacity:0;transition:opacity .3s;
-  white-space:nowrap;max-width:90vw;text-align:center;}
+  white-space:nowrap;max-width:92vw;text-align:center;}
 .toast.show{opacity:1;}
 .dot{display:inline-block;animation:blink 1.4s infinite;}
 .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
 
-/* Responsive scaling */
-@media(min-width:420px){
-  :root{--card-w:70px;--card-h:100px;--card-sm-w:56px;--card-sm-h:80px;}
-}
-@media(min-width:600px){
-  :root{--card-w:78px;--card-h:112px;--card-sm-w:64px;--card-sm-h:90px;}
-  .table-body{grid-template-columns:64px 1fr 64px;}
-}
-@media(min-width:768px){
-  :root{--card-w:86px;--card-h:124px;--card-sm-w:70px;--card-sm-h:100px;}
-  .table-body{grid-template-columns:72px 1fr 72px;}
-}
+@media(min-width:400px){:root{--card-w:70px;--card-h:100px;--card-sm-w:54px;--card-sm-h:78px;}}
+@media(min-width:600px){:root{--card-w:78px;--card-h:112px;--card-sm-w:62px;--card-sm-h:88px;}}
+@media(min-width:768px){:root{--card-w:84px;--card-h:120px;--card-sm-w:68px;--card-sm-h:96px;}
+  .tbody{grid-template-columns:62px 1fr 62px;}}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- ══ LOBBY ══ -->
+<!-- LOBBY -->
 <div class="screen active" id="lobbyScreen">
-  <div class="lobby-logo">All Fours</div>
-  <div class="lobby-sub">Trinidad · Four Player · Partners</div>
-  <div class="lobby-panel">
-    <input class="l-input" id="playerName" placeholder="Your name" maxlength="14"/>
-    <button class="l-btn primary" onclick="createRoom()">🃏 Create Game</button>
-    <div class="divider">— or join with a code —</div>
-    <input class="l-input code" id="joinCode" placeholder="CODE" maxlength="4"/>
-    <button class="l-btn ghost" onclick="joinRoom()">Join Game</button>
+  <div class="logo">All Fours</div>
+  <div class="sub">Trinidad · Four Player · Partners</div>
+  <div class="panel">
+    <input class="inp" id="playerName" placeholder="Your name" maxlength="14"/>
+    <button class="lbtn pri" onclick="createRoom()">🃏 Create Game</button>
+    <div class="div">— or join with a code —</div>
+    <input class="inp code" id="joinCode" placeholder="CODE" maxlength="4"/>
+    <button class="lbtn gho" onclick="joinRoom()">Join Game</button>
   </div>
 </div>
 
-<!-- ══ WAITING ══ -->
+<!-- WAITING -->
 <div class="screen" id="waitingScreen">
-  <div class="lobby-logo" style="font-size:2rem">Waiting...</div>
-  <div class="code-display">
-    <div class="code-hint">Share this code with your friends</div>
-    <div class="code-big" id="displayCode">----</div>
-    <div class="code-hint" onclick="copyCode()">tap to copy</div>
+  <div class="logo" style="font-size:2.2rem">Waiting...</div>
+  <div class="codebox">
+    <div class="codehint">Share this code with your friends</div>
+    <div class="codebig" id="displayCode">----</div>
+    <div class="codehint" onclick="copyCode()">tap to copy</div>
   </div>
-  <div class="p-slots" id="playerSlots"></div>
+  <div class="pslots" id="playerSlots"></div>
   <div id="teamAssign" style="display:none;width:100%;max-width:360px;">
-    <p style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:10px;font-style:italic;">Assign teams then start</p>
-    <div class="team-grid">
-      <div class="team-col ta"><h4>⚔ Team A</h4><div id="teamAList"></div></div>
-      <div class="team-col tb"><h4>🛡 Team B</h4><div id="teamBList"></div></div>
+    <p style="text-align:center;font-size:.8rem;color:rgba(255,255,255,.38);margin-bottom:10px;font-style:italic;">Assign teams then start</p>
+    <div class="tgrid">
+      <div class="tcol ta"><h4>⚔ Team A</h4><div id="teamAList"></div></div>
+      <div class="tcol tb"><h4>🛡 Team B</h4><div id="teamBList"></div></div>
     </div>
-    <button class="l-btn primary" id="startBtn" onclick="startGame()" style="margin-top:12px;" disabled>Start Game</button>
+    <button class="lbtn pri" id="startBtn" onclick="startGame()" style="margin-top:12px;" disabled>Start Game</button>
   </div>
-  <p id="waitMsg" style="color:rgba(255,255,255,.35);font-size:.85rem;margin-top:14px;font-style:italic;">
+  <p id="waitMsg" style="color:rgba(255,255,255,.32);font-size:.85rem;margin-top:14px;font-style:italic;">
     Waiting<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
   </p>
 </div>
 
-<!-- ══ GAME TABLE ══ -->
+<!-- GAME TABLE -->
 <div class="screen" id="gameScreen">
 
-  <!-- Score header: Team A left | Team B right -->
-  <div class="g-header">
-    <div class="team-score left">
-      <div class="ts-label">Team A</div>
-      <div class="ts-row">
-        <div class="ts-pts ta" id="scoreA">0</div>
-      </div>
-      <div class="ts-sub">Games: <span id="gameA">0</span></div>
+  <!-- Header -->
+  <div class="ghdr">
+    <div class="tscore L">
+      <div class="tslbl">Team A</div>
+      <div class="tspts ta" id="scoreA">0</div>
+      <div class="tssub">Games: <span id="gameA">0</span></div>
     </div>
-    <div class="team-score right">
-      <div class="ts-label">Team B</div>
-      <div class="ts-row" style="justify-content:flex-end;">
-        <div class="ts-pts tb" id="scoreB">0</div>
-      </div>
-      <div class="ts-sub">Games: <span id="gameB">0</span></div>
+    <div class="tscore R">
+      <div class="tslbl">Team B</div>
+      <div class="tspts tb" id="scoreB">0</div>
+      <div class="tssub">Games: <span id="gameB">0</span></div>
     </div>
   </div>
 
-  <!-- Table body -->
-  <div class="table-body">
+  <!-- Table body: left | center | right -->
+  <div class="tbody">
+    <div class="sideopp" id="leftOpp"></div>
 
-    <!-- Left opponent -->
-    <div class="side-opp" id="leftOpp"></div>
-
-    <!-- Center panel -->
-    <div class="center-panel">
-
-      <!-- Top row: kick card (left) + top opponent (right) -->
-      <div class="center-top">
-        <!-- Kick card top-left -->
-        <div class="kick-area" id="kickArea" style="display:none;">
-          <div class="kick-label">Trump</div>
+    <div class="cpanel">
+      <!-- Top: kick card (left) + top opponent (right) -->
+      <div class="ctop">
+        <div class="kickarea" id="kickArea" style="display:none;">
+          <div class="kicklbl">Trump</div>
           <div id="kickCardEl"></div>
-          <div id="kickBonusTag"></div>
+          <div id="kickTag"></div>
         </div>
-
-        <!-- Top opponent -->
-        <div class="opp-top-box" id="oppTop"></div>
+        <div class="oppbox" id="oppTop"></div>
       </div>
 
-      <!-- Trick area -->
-      <div class="trick-area" id="trickGrid"></div>
+      <!-- Trick grid -->
+      <div class="trickgrid" id="trickGrid"></div>
 
       <!-- Status -->
-      <div class="center-bottom">
-        <div class="status-bar" id="statusBar">Loading...</div>
+      <div class="cbot">
+        <div class="statusbar" id="statusBar">Loading...</div>
       </div>
-
     </div>
 
-    <!-- Right opponent -->
-    <div class="side-opp" id="rightOpp"></div>
-
+    <div class="sideopp" id="rightOpp"></div>
   </div>
 
   <!-- Bottom bar -->
-  <div class="bottom-bar">
-    <button class="sort-btn" onclick="sortBySuit()">🂠 Sort by Suit</button>
-    <div class="trump-pill">
-      <span class="trump-icon" id="trumpIcon">—</span>
-      <span class="trump-text" id="trumpText">Trump</span>
+  <div class="botbar">
+    <button class="sortbtn" onclick="sortBySuit()">🂠 Sort by Suit</button>
+    <div class="trumppill">
+      <span class="trumpicon" id="trumpIcon">—</span>
+      <span class="trumptxt" id="trumpTxt">Trump</span>
     </div>
-    <div class="game-counter">
-      <span class="gc-label">Games</span>
-      <span class="gc-val ta" id="gcA">0</span>
-      <span style="color:rgba(255,255,255,.3);font-size:.8rem;">·</span>
-      <span class="gc-val tb" id="gcB">0</span>
+    <div class="gctr">
+      <span class="gclbl">Games</span>
+      <span class="gcval ta" id="gcA">0</span>
+      <span style="color:rgba(255,255,255,.25);font-size:.8rem">·</span>
+      <span class="gcval tb" id="gcB">0</span>
     </div>
   </div>
 
   <!-- My hand -->
-  <div class="hand-area">
-    <div class="my-label" id="myLabel">Your Hand</div>
-    <div class="hand-scroll" id="myHand"></div>
+  <div class="handarea">
+    <div class="mylbl" id="myLbl">Your Hand</div>
+    <div class="handscroll" id="myHand"></div>
   </div>
 
 </div><!-- #gameScreen -->
 </div><!-- #app -->
 
-<!-- ══ BEG / STAND POPUP ══ -->
-<div class="modal bottom-sheet" id="betModal">
-  <div class="modal-box">
+<!-- BEG popup — bottom sheet, does NOT cover hand -->
+<div class="bsheet" id="begModal">
+  <div class="bsheet-inner">
     <h3>Beg or Stand?</h3>
-    <p>Trump is <strong id="betTrumpSuit" style="color:var(--gold)">—</strong>.<br>Beg to ask dealer for more cards, or Stand to play as is.</p>
-    <div class="modal-btns">
-      <button class="act-btn gold" onclick="doBet()">🙏 Beg</button>
-      <button class="act-btn red" onclick="doStand()">Stand</button>
+    <p>Trump is <strong id="begTrump" style="color:var(--gold)">—</strong>. Beg to ask dealer for more cards, or Stand to play as is.</p>
+    <div class="bsheet-btns">
+      <button class="abtn2 gold" onclick="doBeg()">🙏 Beg</button>
+      <button class="abtn2 red" onclick="doStand()">Stand</button>
     </div>
   </div>
 </div>
 
-<!-- Dealer choice popup -->
-<div class="modal bottom-sheet" id="dealerModal">
-  <div class="modal-box">
+<!-- DEALER popup — bottom sheet, does NOT cover hand -->
+<div class="bsheet" id="dealerModal">
+  <div class="bsheet-inner">
     <h3>Give or Run the Pack?</h3>
-    <p><strong id="bettorName" style="color:var(--gold)">—</strong> is begging.<br>Give them 1 point, or Run the Pack to deal 3 more cards and kick a new trump?</p>
-    <div class="modal-btns">
-      <button class="act-btn blue" onclick="doGive()">Give (+1)</button>
-      <button class="act-btn gold" onclick="doRunPack()">Run the Pack 🃏</button>
+    <p><strong id="beggorName" style="color:var(--gold)">—</strong> is begging. Give them 1 point, or deal 3 more cards and kick a new trump?</p>
+    <div class="bsheet-btns">
+      <button class="abtn2 blue" onclick="doGive()">Give (+1)</button>
+      <button class="abtn2 gold" onclick="doRunPack()">Run the Pack 🃏</button>
     </div>
   </div>
 </div>
 
 <!-- Round summary -->
-<div class="modal center-modal" id="summaryModal">
-  <div class="modal-box">
+<div class="modal" id="summaryModal">
+  <div class="mbox">
     <h3 id="summaryTitle">Round Over</h3>
-    <div id="summaryRows" style="margin:12px 0;text-align:left;"></div>
-    <div class="sum-total" id="summaryTotal"></div>
-    <button class="act-btn gold wide" id="nextBtn" onclick="nextRound()">Next Round →</button>
+    <div id="summaryRows" style="margin:10px 0;text-align:left;"></div>
+    <div class="stotal" id="summaryTotal"></div>
+    <button class="abtn2 gold wide" id="nextBtn" onclick="nextRound()">Next Round →</button>
   </div>
 </div>
 
 <!-- Game over -->
-<div class="modal center-modal" id="gameOverModal">
-  <div class="modal-box">
-    <h3 id="gameOverTitle">Game Over!</h3>
-    <p id="gameOverSub"></p>
-    <div id="gameOverRows" style="margin:12px 0;text-align:left;"></div>
-    <button class="act-btn gold wide" onclick="resetGame()">Play Again</button>
+<div class="modal" id="gameOverModal">
+  <div class="mbox">
+    <h3 id="goTitle">Game Over!</h3>
+    <p id="goSub"></p>
+    <div id="goRows" style="margin:10px 0;text-align:left;"></div>
+    <button class="abtn2 gold wide" onclick="resetGame()">Play Again</button>
   </div>
 </div>
 
@@ -482,16 +400,15 @@ const SUIT_COLOR={'♠':'black','♣':'black','♥':'red','♦':'red'};
 const SUIT_ORDER={'♠':0,'♥':1,'♦':2,'♣':3};
 const ROLES=['p0','p1','p2','p3'];
 
-let ws,myRole,myName,roomCode,state=null,localHandOrder=null;
+let ws,myRole,myName,roomCode,state=null,localOrder=null;
 
-// Utils
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
 function makeDeck(){const d=[];SUITS.forEach(s=>RANKS.forEach(r=>d.push({suit:s,rank:r})));return d;}
 function cardGV(c){return({A:4,K:3,Q:2,J:1,10:10}[c.rank])||0;}
 function rankTrick(c,trump,led){if(c.suit===trump)return 100+RANK_VAL[c.rank];if(c.suit===led)return RANK_VAL[c.rank];return 0;}
 function teamOf(r,teams){if(!teams)return null;if((teams.A||[]).includes(r))return'A';if((teams.B||[]).includes(r))return'B';return null;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function closeAllModals(){['betModal','dealerModal','summaryModal','gameOverModal'].forEach(id=>document.getElementById(id).classList.remove('open'));}
+function closeAllPopups(){['begModal','dealerModal'].forEach(id=>{document.getElementById(id).classList.remove('open');});}
 function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
 function copyCode(){navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied!')).catch(()=>{});}
 
@@ -512,9 +429,10 @@ function handleMsg(msg){
     case 'lobby_update': state=msg.state;renderWaiting();break;
     case 'state':
       state=msg.state;myRole=state.myRole||myRole;
-      localHandOrder=null;
+      localOrder=null;
+      closeAllPopups();
       if(['lobby','team_select','waiting'].includes(state.phase)){showScreen('waitingScreen');renderWaiting();}
-      else{closeAllModals();showScreen('gameScreen');renderGame();handlePhaseUI();}
+      else{showScreen('gameScreen');renderGame();handlePhaseUI();}
       break;
     case 'player_left': toast('A player disconnected 😢',4000);break;
     case 'error': toast(msg.msg);break;
@@ -537,31 +455,31 @@ function renderWaiting(){
   document.getElementById('displayCode').textContent=roomCode||'----';
   document.getElementById('playerSlots').innerHTML=ROLES.map((r,i)=>{
     const nm=state[r],team=state.teams?teamOf(r,state.teams):null;
-    const tl=team?`<div class="slot-team ${team==='A'?'ta':'tb'}">Team ${team}</div>`:'';
-    return`<div class="p-slot ${nm?'filled':''}"><div class="slot-n">P${i+1}</div>
-      ${nm?`<div class="slot-name">${nm}</div>${tl}`:'<div style="color:rgba(255,255,255,.2);font-size:.8rem;">Empty</div>'}</div>`;
+    const tl=team?`<div class="slott ${team==='A'?'ta':'tb'}">Team ${team}</div>`:'';
+    return`<div class="pslot ${nm?'filled':''}"><div class="slotn">P${i+1}</div>
+      ${nm?`<div class="slotnm">${nm}</div>${tl}`:'<div style="color:rgba(255,255,255,.2);font-size:.8rem">Empty</div>'}</div>`;
   }).join('');
   const all=state.playerCount===4,isHost=myRole==='p0';
   const ta=document.getElementById('teamAssign'),wm=document.getElementById('waitMsg');
-  if(all&&isHost){ta.style.display='block';wm.style.display='none';renderTeamAssign();}
+  if(all&&isHost){ta.style.display='block';wm.style.display='none';renderTeams();}
   else if(all&&!isHost){ta.style.display='none';wm.style.display='block';wm.innerHTML='Host is setting up teams<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';}
   else{ta.style.display='none';wm.style.display='block';wm.innerHTML=`${state.playerCount}/4 joined<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>`;}
 }
-function renderTeamAssign(){
+function renderTeams(){
   if(!state.teams)state.teams={A:['p0','p2'],B:['p1','p3']};
   const ml=tk=>state.teams[tk].map(r=>{
     const other=tk==='A'?'B':'A';
-    return`<div class="a-row"><span class="a-name">${state[r]||r}</span>
-      <button class="a-btn to-${other.toLowerCase()}" onclick="moveToTeam('${r}','${other}')">→${other}</button></div>`;
+    return`<div class="arow"><span class="anm">${state[r]||r}</span>
+      <button class="abtn ${tk==='A'?'tob':'toa'}" onclick="moveTeam('${r}','${other}')">→${other}</button></div>`;
   }).join('');
   document.getElementById('teamAList').innerHTML=ml('A');
   document.getElementById('teamBList').innerHTML=ml('B');
   document.getElementById('startBtn').disabled=!(state.teams.A.length===2&&state.teams.B.length===2);
 }
-function moveToTeam(role,to){
+function moveTeam(role,to){
   const from=to==='A'?'B':'A';
   state.teams[from]=state.teams[from].filter(r=>r!==role);
-  state.teams[to].push(role);renderTeamAssign();
+  state.teams[to].push(role);renderTeams();
   send({type:'update_lobby',state});
 }
 function startGame(){
@@ -569,25 +487,27 @@ function startGame(){
   dealRound();
 }
 
-// Dealing
+// Deal
 function dealRound(){
   const deck=shuffle(makeDeck());
   state.hands={p0:deck.slice(0,6),p1:deck.slice(6,12),p2:deck.slice(12,18),p3:deck.slice(18,24)};
   state.remainingDeck=deck.slice(24);
   const kick=state.remainingDeck.shift();
   state.kickCard=kick;state.trumpSuit=kick.suit;
-  const bonuses=calcKickBonuses(kick,state.dealer,state.teams);
+  const bonuses=kickBonuses(kick,state.dealer,state.teams);
   state.kickBonuses=bonuses;
+  // Apply kick bonuses immediately to score
   bonuses.forEach(b=>{state.scores[b.team]=(state.scores[b.team]||0)+b.pts;});
+  // Track highest/lowest trump holders
   const allC=ROLES.flatMap(r=>state.hands[r]);
   const trumps=allC.filter(c=>c.suit===state.trumpSuit);
-  state.highTrumpHolder=null;state.lowTrumpHolder=null;
+  state.highHolder=null;state.lowHolder=null;
   if(trumps.length){
     const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
     const lt=trumps.reduce((a,b)=>RANK_VAL[a.rank]<RANK_VAL[b.rank]?a:b);
     ROLES.forEach(r=>{
-      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highTrumpHolder=r;
-      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowTrumpHolder=r;
+      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highHolder=r;
+      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowHolder=r;
     });
   }
   state.phase='bet';
@@ -595,14 +515,15 @@ function dealRound(){
   state.trickWins={p0:0,p1:0,p2:0,p3:0};
   state.ledSuit=null;state.jackCaptured=null;
   state.gamePoints={p0:0,p1:0,p2:0,p3:0};
-  state.betStatus=null;state.bettor=null;state.trickCount=0;
-  state.roundSummary=null;state.round=(state.round||0)+1;
+  state.bettor=null;state.trickCount=0;state.roundSummary=null;
+  state.round=(state.round||0)+1;
+  // Player to RIGHT of dealer goes first (beg or stand)
   const di=ROLES.indexOf(state.dealer);
   state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
 }
 
-function calcKickBonuses(card,dealerRole,teams){
+function kickBonuses(card,dealerRole,teams){
   const b=[],dt=teamOf(dealerRole,teams);if(!dt)return b;
   if(card.rank==='A')b.push({pts:1,team:dt,reason:'Ace kicked'});
   if(card.rank==='6')b.push({pts:2,team:dt,reason:'Six kicked'});
@@ -620,17 +541,19 @@ function runThePack(){
   }
   if(!kick){toast('Deck exhausted — redealing');dealRound();return;}
   state.kickCard=kick;state.trumpSuit=kick.suit;
-  const nb=calcKickBonuses(kick,state.dealer,state.teams);
+  const nb=kickBonuses(kick,state.dealer,state.teams);
   state.kickBonuses=[...(state.kickBonuses||[]),...nb];
   nb.forEach(b=>{state.scores[b.team]=(state.scores[b.team]||0)+b.pts;});
+  // Recalculate high/low trump holders
   const allC=ROLES.flatMap(r=>state.hands[r]);
   const trumps=allC.filter(c=>c.suit===state.trumpSuit);
+  state.highHolder=null;state.lowHolder=null;
   if(trumps.length){
     const ht=trumps.reduce((a,b)=>RANK_VAL[a.rank]>RANK_VAL[b.rank]?a:b);
     const lt=trumps.reduce((a,b)=>RANK_VAL[a.rank]<RANK_VAL[b.rank]?a:b);
     ROLES.forEach(r=>{
-      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highTrumpHolder=r;
-      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowTrumpHolder=r;
+      if(state.hands[r].some(c=>c.suit===ht.suit&&c.rank===ht.rank))state.highHolder=r;
+      if(state.hands[r].some(c=>c.suit===lt.suit&&c.rank===lt.rank))state.lowHolder=r;
     });
   }
   const di=ROLES.indexOf(state.dealer);
@@ -642,8 +565,7 @@ function runThePack(){
 function sortBySuit(){
   if(!state||!state.hands||!state.hands[myRole])return;
   const trump=state.trumpSuit;
-  localHandOrder=[...state.hands[myRole]].sort((a,b)=>{
-    // Trump first, then by suit order, then by rank desc
+  localOrder=[...state.hands[myRole]].sort((a,b)=>{
     const aT=a.suit===trump?-1:SUIT_ORDER[a.suit]+1;
     const bT=b.suit===trump?-1:SUIT_ORDER[b.suit]+1;
     if(aT!==bT)return aT-bT;
@@ -653,150 +575,138 @@ function sortBySuit(){
 }
 
 // Render
+function cardHtml(c,extra=''){
+  if(!c||c.hidden)return'';
+  return`<div class="card ${SUIT_COLOR[c.suit]} ${extra}">
+    <div class="ctop2"><div class="crank">${c.rank}</div><div class="csuit">${c.suit}</div></div>
+    <div class="cmid">${c.suit}</div>
+    <div class="cbot2"><div class="crank">${c.rank}</div><div class="csuit">${c.suit}</div></div></div>`;
+}
+
 function renderGame(){
   if(!state)return;
   const me=myRole,myIdx=ROLES.indexOf(me);
   const rR=ROLES[(myIdx+1)%4],tR=ROLES[(myIdx+2)%4],lR=ROLES[(myIdx+3)%4];
 
-  // During bet/dealer_choice phase, only the beggar and dealer can see their cards
-  // Everyone else's hand stays locked
-  const begPhase = state.phase==='bet'||state.phase==='dealer_choice';
+  // Who can see their cards during beg phase?
+  // Only the beggor (right of dealer) and the dealer can see their hand
+  const begPhase=state.phase==='bet'||state.phase==='dealer_choice';
   const di=ROLES.indexOf(state.dealer);
-  const beggor=ROLES[(di+1)%4]; // player to right of dealer begs
-  const canSeeMyHand = !begPhase || me===beggor || me===state.dealer;
+  const beggor=ROLES[(di+1)%4];
+  const canSee=!begPhase||(me===beggor||me===state.dealer);
 
   // Scores
   document.getElementById('scoreA').textContent=state.scores.A||0;
   document.getElementById('scoreB').textContent=state.scores.B||0;
   const gw=state.gamesWon||{A:0,B:0};
-  document.getElementById('gameA').textContent=gw.A||0;
-  document.getElementById('gameB').textContent=gw.B||0;
-  document.getElementById('gcA').textContent=gw.A||0;
-  document.getElementById('gcB').textContent=gw.B||0;
+  ['gameA','gcA'].forEach(id=>document.getElementById(id).textContent=gw.A||0);
+  ['gameB','gcB'].forEach(id=>document.getElementById(id).textContent=gw.B||0);
 
-  // Trump
+  // Trump pill
   const ts=state.trumpSuit;
   document.getElementById('trumpIcon').textContent=ts||'—';
-  document.getElementById('trumpIcon').style.color=ts?(SUIT_COLOR[ts]==='red'?'#e74c3c':'#eee'):'rgba(255,255,255,.4)';
-  document.getElementById('trumpText').textContent=ts?`${ts} Trump`:'Trump';
+  document.getElementById('trumpIcon').style.color=ts?(SUIT_COLOR[ts]==='red'?'#e74c3c':'#eee'):'rgba(255,255,255,.35)';
+  document.getElementById('trumpTxt').textContent=ts?`${ts} Trump`:'Trump';
 
   // Top opponent
-  const isTopTurn=state.turn===tR,isTopDealer=state.dealer===tR;
+  const isTTurn=state.turn===tR,isTDlr=state.dealer===tR;
   document.getElementById('oppTop').innerHTML=`
-    <div class="opp-avatar ${isTopTurn?'turn':''}">🎭</div>
-    <div class="opp-name">${state[tR]||'?'} <span style="font-size:.58rem;color:${teamOf(tR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">T${teamOf(tR,state.teams)||'?'}</span></div>
-    ${isTopDealer?'<div class="opp-dealer">DEALER</div>':''}
-    <div class="mini-hand">${(state.hands[tR]||[]).map(()=>`<div class="mini-card"></div>`).join('')}</div>`;
+    <div class="oppavatar ${isTTurn?'turn':''}">🎭</div>
+    <div class="oppnm">${state[tR]||'?'} <span style="font-size:.56rem;color:${teamOf(tR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">T${teamOf(tR,state.teams)||'?'}</span></div>
+    ${isTDlr?'<div class="oppdlr">DEALER</div>':''}
+    <div class="minihand">${(state.hands[tR]||[]).map(()=>`<div class="minic"></div>`).join('')}</div>`;
 
-  // Left opponent
-  const isLTurn=state.turn===lR,isLDealer=state.dealer===lR;
+  // Left opp
+  const isLTurn=state.turn===lR,isLDlr=state.dealer===lR;
   document.getElementById('leftOpp').innerHTML=`
-    <div class="side-avatar ${isLTurn?'turn':''}">🎭</div>
-    <div class="side-name" style="color:${teamOf(lR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[lR]||'?'}</div>
-    ${isLDealer?'<div class="side-dealer">DEALER</div>':''}
-    <div class="side-cards-v">${(state.hands[lR]||[]).map(()=>`<div class="mini-card-h"></div>`).join('')}</div>`;
+    <div class="savatar ${isLTurn?'turn':''}">🎭</div>
+    <div class="snm" style="color:${teamOf(lR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[lR]||'?'}</div>
+    ${isLDlr?'<div class="sdlr">DEALER</div>':''}
+    <div class="scards">${(state.hands[lR]||[]).map(()=>`<div class="minih"></div>`).join('')}</div>`;
 
-  // Right opponent
-  const isRTurn=state.turn===rR,isRDealer=state.dealer===rR;
+  // Right opp
+  const isRTurn=state.turn===rR,isRDlr=state.dealer===rR;
   document.getElementById('rightOpp').innerHTML=`
-    <div class="side-avatar ${isRTurn?'turn':''}">🎭</div>
-    <div class="side-name" style="color:${teamOf(rR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[rR]||'?'}</div>
-    ${isRDealer?'<div class="side-dealer">DEALER</div>':''}
-    <div class="side-cards-v">${(state.hands[rR]||[]).map(()=>`<div class="mini-card-h"></div>`).join('')}</div>`;
+    <div class="savatar ${isRTurn?'turn':''}">🎭</div>
+    <div class="snm" style="color:${teamOf(rR,state.teams)==='A'?'var(--teamA)':'var(--teamB)'}">${state[rR]||'?'}</div>
+    ${isRDlr?'<div class="sdlr">DEALER</div>':''}
+    <div class="scards">${(state.hands[rR]||[]).map(()=>`<div class="minih"></div>`).join('')}</div>`;
 
-  // Kick card (top-left of center)
+  // Kick card
   const ka=document.getElementById('kickArea');
   if(state.kickCard&&state.phase!=='lobby'){
     ka.style.display='flex';
-    document.getElementById('kickCardEl').innerHTML=buildCardHtml(state.kickCard,'kick-size');
-    const bt=document.getElementById('kickBonusTag');
+    document.getElementById('kickCardEl').innerHTML=cardHtml(state.kickCard,'kc');
     const btxt=(state.kickBonuses||[]).map(b=>`+${b.pts} T${b.team}: ${b.reason}`).join(' · ');
-    bt.innerHTML=btxt?`<div class="kick-bonus-tag">${btxt}</div>`:'';
+    document.getElementById('kickTag').innerHTML=btxt?`<div class="kicktag">${btxt}</div>`:'';
   } else ka.style.display='none';
 
   // Trick grid
-  renderTrickGrid(me,tR,lR,rR);
-
-  // Status
-  renderStatus();
-
-  // My label + dealer badge
-  const isMeDealer=state.dealer===myRole;
-  document.getElementById('myLabel').textContent=`${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}${isMeDealer?' · DEALER':''}`;
-
-  renderHand(canSeeMyHand);
-}
-
-function renderTrickGrid(me,tR,lR,rR){
   const tg=document.getElementById('trickGrid');
   const slot=(role,lbl)=>{
     const c=state.trickCard&&state.trickCard[role];
     const nm=lbl||state[role]||'';
-    if(!c)return`<div class="t-slot"><div class="t-name">${nm}</div><div class="t-slot-empty"></div></div>`;
-    return`<div class="t-slot"><div class="t-name">${nm}</div>${buildCardHtml(c,'sm')}</div>`;
+    if(!c)return`<div class="tslot"><div class="tnm">${nm}</div><div class="tempty"></div></div>`;
+    return`<div class="tslot"><div class="tnm">${nm}</div>${cardHtml(c,'sm')}</div>`;
   };
   tg.innerHTML=`
     <div></div>${slot(tR,state[tR]||'')}<div></div>
-    ${slot(lR,state[lR]||'')}
-    <div class="t-center-icon">⚔</div>
-    ${slot(rR,state[rR]||'')}
+    ${slot(lR,state[lR]||'')}<div class="ticon">⚔</div>${slot(rR,state[rR]||'')}
     <div></div>${slot(me,'You')}<div></div>`;
-}
 
-function buildCardHtml(c,extra=''){
-  if(!c||c.hidden)return'';
-  const col=SUIT_COLOR[c.suit];
-  return`<div class="card ${col} ${extra}"><div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div><div class="c-mid">${c.suit}</div><div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
+  // Status
+  renderStatus(beggor);
+
+  // My label
+  const isMeDlr=state.dealer===myRole;
+  document.getElementById('myLbl').textContent=
+    `${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}${isMeDlr?' · DEALER':''}`;
+
+  // Hand
+  renderHand(canSee);
 }
 
 function renderHand(canSee=true){
   if(!state||!state.hands)return;
   const hs=document.getElementById('myHand');
-  // If cards are locked during beg phase, show face-down cards with a message
   if(!canSee){
     const count=(state.hands[myRole]||[]).length;
-    hs.className='hand-scroll';
+    hs.className='handscroll';
     hs.innerHTML=Array(count).fill(0).map(()=>
-      `<div style="width:var(--card-w);height:var(--card-h);border-radius:8px;
-        background:linear-gradient(135deg,#1a237e,#283593);border:2px solid rgba(255,255,255,.15);
-        display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;
-        box-shadow:2px 4px 8px rgba(0,0,0,.5);">🔒</div>`
-    ).join('');
+      `<div class="lockcard">🔒</div>`).join('');
     return;
   }
-  const myCards=localHandOrder||state.hands[myRole]||[];
-  const realHand=state.hands[myRole]||[];
+  const cards=localOrder||state.hands[myRole]||[];
+  const real=state.hands[myRole]||[];
   const canPlay=isMyTurn()&&state.phase==='playing';
-  hs.className='hand-scroll'+(myCards.length>7?' many':'');
-  hs.innerHTML=myCards.map((c)=>{
+  hs.className='handscroll'+(cards.length>7?' many':'');
+  hs.innerHTML=cards.map(c=>{
     if(c.hidden)return'';
-    const realIdx=realHand.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
-    const ok=canPlay&&canPlayCard(c,realHand);
+    const ri=real.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
+    const ok=canPlay&&canPlayCard(c,real);
     const isTrump=state.trumpSuit&&c.suit===state.trumpSuit;
-    return`<div class="card ${SUIT_COLOR[c.suit]} ${ok?'playable':''} ${isTrump?'trump-c':''}" onclick="${ok?`playCard(${realIdx})`:''}">\
-      <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>\
-      <div class="c-mid">${c.suit}</div>\
-      <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
+    return`<div class="card ${SUIT_COLOR[c.suit]} ${ok?'playable':''} ${isTrump?'trumpc':''}" onclick="${ok?`playCard(${ri})`:''}">\
+      <div class="ctop2"><div class="crank">${c.rank}</div><div class="csuit">${c.suit}</div></div>\
+      <div class="cmid">${c.suit}</div>\
+      <div class="cbot2"><div class="crank">${c.rank}</div><div class="csuit">${c.suit}</div></div></div>`;
   }).join('');
 }
 
 function isMyTurn(){return state&&state.turn===myRole;}
 
-function renderStatus(){
+function renderStatus(beggor){
   const bar=document.getElementById('statusBar');
   const ph=state.phase,mt=isMyTurn(),tn=state[state.turn]||'?';
   if(ph==='bet'){
-    const di2=ROLES.indexOf(state.dealer);
-    const beggor=ROLES[(di2+1)%4];
-    if(myRole===beggor) bar.textContent='Your turn — see popup below';
-    else if(myRole===state.dealer) bar.textContent=`Waiting for ${state[beggor]||'?'} to beg or stand...`;
-    else bar.textContent='Waiting — cards locked until beg is resolved';
+    if(myRole===beggor)bar.textContent='Your turn — Beg or Stand?';
+    else if(myRole===state.dealer)bar.textContent=`Waiting for ${state[beggor]||'?'} to beg or stand...`;
+    else bar.textContent='Cards locked — waiting for beg decision...';
     return;
   }
   if(ph==='dealer_choice'){
-    if(state.turn===myRole) bar.textContent='Your turn — see popup below';
-    else if(myRole===ROLES[(ROLES.indexOf(state.dealer)+1)%4]) bar.textContent='Waiting for dealer to decide...';
-    else bar.textContent='Waiting — cards locked until dealer decides';
+    if(state.turn===myRole)bar.textContent='Your turn — Give or Run the Pack?';
+    else if(myRole===beggor)bar.textContent='Waiting for dealer to decide...';
+    else bar.textContent='Cards locked — waiting for dealer decision...';
     return;
   }
   if(ph==='playing'){
@@ -809,14 +719,17 @@ function renderStatus(){
 }
 
 function handlePhaseUI(){
-  if(state.phase==='bet'&&isMyTurn()){
-    // Show bet/stand popup
-    document.getElementById('betTrumpSuit').textContent=state.trumpSuit||'?';
-    document.getElementById('betModal').classList.add('open');
+  const di=ROLES.indexOf(state.dealer);
+  const beggor=ROLES[(di+1)%4];
+  // Show beg popup to the beggor only
+  if(state.phase==='bet'&&myRole===beggor){
+    document.getElementById('begTrump').textContent=state.trumpSuit||'?';
+    document.getElementById('begModal').classList.add('open');
     return;
   }
+  // Show dealer popup to dealer only
   if(state.phase==='dealer_choice'&&state.turn===myRole){
-    document.getElementById('bettorName').textContent=state[state.bettor]||'Opponent';
+    document.getElementById('beggorName').textContent=state[state.bettor]||'Opponent';
     document.getElementById('dealerModal').classList.add('open');
     return;
   }
@@ -824,20 +737,18 @@ function handlePhaseUI(){
   if(state.phase==='game_over')showGameOver();
 }
 
-// Bet phase
-function doBet(){
-  document.getElementById('betModal').classList.remove('open');
-  if(!isMyTurn())return;
-  state.bettor=myRole;state.betStatus='bet';
-  state.phase='dealer_choice';state.turn=state.dealer;
+// Beg actions
+function doBeg(){
+  document.getElementById('begModal').classList.remove('open');
+  if(myRole!==ROLES[(ROLES.indexOf(state.dealer)+1)%4])return;
+  state.bettor=myRole;state.phase='dealer_choice';state.turn=state.dealer;
   send({type:'update',state});
 }
 function doStand(){
-  document.getElementById('betModal').classList.remove('open');
-  if(!isMyTurn())return;
-  state.betStatus='stand';state.phase='playing';
+  document.getElementById('begModal').classList.remove('open');
   const di=ROLES.indexOf(state.dealer);
-  state.turn=ROLES[(di+1)%4];
+  if(myRole!==ROLES[(di+1)%4])return;
+  state.phase='playing';state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
 }
 function doGive(){
@@ -846,9 +757,8 @@ function doGive(){
   const bt=teamOf(state.bettor,state.teams);
   state.scores[bt]=(state.scores[bt]||0)+1;
   toast(`+1 to Team ${bt} — Give!`);
-  state.phase='playing';
   const di=ROLES.indexOf(state.dealer);
-  state.turn=ROLES[(di+1)%4];
+  state.phase='playing';state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
 }
 function doRunPack(){
@@ -874,12 +784,11 @@ function playCard(idx){
   hand.splice(idx,1);state.hands[myRole]=hand;
   state.trickCard[myRole]=card;
   if(!state.ledSuit)state.ledSuit=card.suit;
-  localHandOrder=null;
+  localOrder=null;
   const allPlayed=ROLES.every(r=>state.trickCard[r]!==null);
   if(allPlayed)resolveTrick();
   else{const i2=ROLES.indexOf(myRole);state.turn=ROLES[(i2+1)%4];send({type:'update',state});}
 }
-
 function resolveTrick(){
   const trump=state.trumpSuit,led=state.ledSuit;
   let best=null,winner=null;
@@ -897,9 +806,9 @@ function resolveTrick(){
 function scoreRound(){
   const rp={A:0,B:0},summary=[];
   (state.kickBonuses||[]).forEach(b=>{summary.push({label:b.reason,team:b.team,pts:b.pts,note:'(scored at kick)'});});
-  if(state.highTrumpHolder){const t=teamOf(state.highTrumpHolder,state.teams);rp[t]++;summary.push({label:'🏆 Highest Trump',team:t,pts:1});}
+  if(state.highHolder){const t=teamOf(state.highHolder,state.teams);rp[t]++;summary.push({label:'🏆 Highest Trump',team:t,pts:1});}
   else summary.push({label:'🏆 Highest Trump',team:null,pts:0});
-  if(state.lowTrumpHolder){const t=teamOf(state.lowTrumpHolder,state.teams);rp[t]++;summary.push({label:'🔻 Lowest Trump',team:t,pts:1});}
+  if(state.lowHolder){const t=teamOf(state.lowHolder,state.teams);rp[t]++;summary.push({label:'🔻 Lowest Trump',team:t,pts:1});}
   else summary.push({label:'🔻 Lowest Trump',team:null,pts:0});
   if(state.jackCaptured){const t=teamOf(state.jackCaptured,state.teams);rp[t]++;summary.push({label:'🃏 Hanging Jack',team:t,pts:1});}
   else summary.push({label:'🃏 Hanging Jack',team:null,pts:0,note:'Not in play'});
@@ -909,7 +818,7 @@ function scoreRound(){
   else summary.push({label:`🎯 Game (Tied ${gpA})`,team:null,pts:0});
   state.scores.A=(state.scores.A||0)+rp.A;
   state.scores.B=(state.scores.B||0)+rp.B;
-  state.roundSummary=summary;state.roundPts=rp;
+  state.roundSummary=summary;
   if(!state.gamesWon)state.gamesWon={A:0,B:0};
   if(state.scores.A>=14||state.scores.B>=14){
     const gw=state.scores.A>=14?'A':'B';
@@ -922,12 +831,11 @@ function scoreRound(){
 }
 
 function showSummary(){
-  const myT=teamOf(myRole,state.teams);
   document.getElementById('summaryTitle').textContent='Round Summary';
   document.getElementById('summaryRows').innerHTML=(state.roundSummary||[]).map(s=>{
-    const vc=s.team?`sum-val t${s.team.toLowerCase()}`:'sum-val none';
+    const vc=s.team?`sval t${s.team.toLowerCase()}`:'sval none';
     const vt=s.team?`+${s.pts} Team ${s.team}${s.note?' '+s.note:''}`:(s.note||'—');
-    return`<div class="sum-row"><span>${s.label}</span><span class="${vc}">${vt}</span></div>`;
+    return`<div class="srow"><span>${s.label}</span><span class="${vc}">${vt}</span></div>`;
   }).join('');
   document.getElementById('summaryTotal').textContent=`Score — Team A: ${state.scores.A} · Team B: ${state.scores.B} · First to 14`;
   const nb=document.getElementById('nextBtn');
@@ -935,33 +843,26 @@ function showSummary(){
   nb.style.display=myRole===state.dealer?'':'none';
   document.getElementById('summaryModal').classList.add('open');
 }
-
 function showGameOver(){
   const myT=teamOf(myRole,state.teams);
   const winner=state.scores.A>=14?'A':'B';
-  document.getElementById('gameOverTitle').textContent=myT===winner?'🎉 Your Team Wins!':'😔 You Lost';
-  document.getElementById('gameOverSub').textContent=`Team ${winner} reached 14 points!`;
+  document.getElementById('goTitle').textContent=myT===winner?'🎉 Your Team Wins!':'😔 You Lost';
+  document.getElementById('goSub').textContent=`Team ${winner} reached 14 points!`;
   const gw=state.gamesWon||{A:0,B:0};
-  document.getElementById('gameOverRows').innerHTML=(state.roundSummary||[]).map(s=>{
-    const vc=s.team?`sum-val t${s.team.toLowerCase()}`:'sum-val none';
+  document.getElementById('goRows').innerHTML=(state.roundSummary||[]).map(s=>{
+    const vc=s.team?`sval t${s.team.toLowerCase()}`:'sval none';
     const vt=s.team?`+${s.pts} Team ${s.team}`:(s.note||'—');
-    return`<div class="sum-row"><span>${s.label}</span><span class="${vc}">${vt}</span></div>`;
-  }).join('')+`<div class="sum-row" style="margin-top:8px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px;">
-    <span>Total Games Won</span><span><span class="ta">A:${gw.A}</span> · <span class="tb">B:${gw.B}</span></span></div>`;
+    return`<div class="srow"><span>${s.label}</span><span class="${vc}">${vt}</span></div>`;
+  }).join('')+`<div class="srow" style="margin-top:8px;border-top:1px solid rgba(255,255,255,.1);padding-top:8px;">
+    <span>Games Won</span><span><span class="ta">A:${gw.A}</span> · <span class="tb">B:${gw.B}</span></span></div>`;
   document.getElementById('summaryModal').classList.remove('open');
   document.getElementById('gameOverModal').classList.add('open');
 }
-
-function nextRound(){
-  document.getElementById('summaryModal').classList.remove('open');
-  dealRound();
-}
+function nextRound(){document.getElementById('summaryModal').classList.remove('open');dealRound();}
 function resetGame(){
   document.getElementById('gameOverModal').classList.remove('open');
-  state.scores={A:0,B:0};state.round=0;state.dealer='p0';
-  dealRound();
+  state.scores={A:0,B:0};state.round=0;state.dealer='p0';dealRound();
 }
 </script>
 </body>
 </html>
- 
