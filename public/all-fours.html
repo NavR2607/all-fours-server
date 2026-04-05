@@ -243,31 +243,35 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'In
 .hand-cards::-webkit-scrollbar{width:3px;}
 .hand-cards::-webkit-scrollbar-thumb{background:rgba(240,192,64,.3);border-radius:2px;}
 
-/* ── CARDS ── */
+/* ── CARDS — NLCB style ── */
 .card{
-  border-radius:8px;background:#fff;border:1.5px solid #ccc;
-  display:flex;flex-direction:column;padding:3px 4px 2px;
+  border-radius:6px;background:#fff;border:1px solid #ddd;
+  display:flex;flex-direction:column;
   cursor:default;box-shadow:2px 4px 8px rgba(0,0,0,.45);
   transition:transform .15s,box-shadow .15s;user-select:none;flex-shrink:0;
+  position:relative;overflow:hidden;
 }
-.card.playable{cursor:pointer;border-color:#f0c040;
-  box-shadow:2px 4px 8px rgba(0,0,0,.4),0 0 0 2px rgba(240,192,64,.5);}
-.card.playable:active,.card.playable:hover{transform:translateY(-8px);
-  box-shadow:3px 12px 20px rgba(0,0,0,.55),0 0 0 2px #f0c040;}
-.card.trumpc{border-color:#e74c3c;}
-.c-top{display:flex;flex-direction:column;line-height:1.1;}
-.c-rank{font-size:.9rem;font-weight:900;font-family:'Playfair Display',serif;}
-.c-suit{font-size:.75rem;}
-.c-mid{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
-.c-bot{transform:rotate(180deg);display:flex;flex-direction:column;line-height:1.1;}
-.card.red .c-rank,.card.red .c-suit,.card.red .c-mid{color:#c0392b;}
-.card.black .c-rank,.card.black .c-suit,.card.black .c-mid{color:#111;}
+.card.playable{cursor:pointer;border:2px solid #3b82f6;
+  box-shadow:2px 4px 8px rgba(0,0,0,.4),0 0 0 2px rgba(59,130,246,.4);}
+.card.playable:active,.card.playable:hover{transform:translateY(-10px);
+  box-shadow:3px 14px 22px rgba(0,0,0,.55),0 0 0 3px #3b82f6;}
+.card.trumpc{border:2px solid #e74c3c;}
+/* Corner rank + suit */
+.c-tl{position:absolute;top:4px;left:5px;display:flex;flex-direction:column;align-items:flex-start;line-height:1;}
+.c-br{position:absolute;bottom:4px;right:5px;display:flex;flex-direction:column;align-items:flex-end;line-height:1;transform:rotate(180deg);}
+.c-rank{font-size:1.1rem;font-weight:900;font-family:'Playfair Display',serif;line-height:1;}
+.c-suit-sm{font-size:.8rem;line-height:1;margin-top:-1px;}
+/* Big suit center */
+.c-mid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.4rem;line-height:1;}
+.card.red .c-rank,.card.red .c-suit-sm,.card.red .c-mid{color:#cc0000;}
+.card.black .c-rank,.card.black .c-suit-sm,.card.black .c-mid{color:#111;}
 /* Hand cards size */
-.hand-cards .card{width:68px;height:98px;}
-.hand-cards .card .c-mid{font-size:1.7rem;}
+.hand-cards .card{width:72px;height:104px;}
 /* Trick cards smaller */
 .card.trick-sz{width:52px;height:74px;}
-.card.trick-sz .c-rank{font-size:.76rem;}.card.trick-sz .c-mid{font-size:1.2rem;}.card.trick-sz .c-suit{font-size:.65rem;}
+.card.trick-sz .c-rank{font-size:.82rem;}
+.card.trick-sz .c-mid{font-size:1.6rem;}
+.card.trick-sz .c-suit-sm{font-size:.65rem;}
 
 /* ── MODALS ── */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
@@ -631,9 +635,10 @@ function cardHtml(c,extra=''){
   if(!c||c.hidden)return'';
   const col=SC[c.suit];
   return`<div class="card ${col} ${extra}">
-    <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>
+    <div class="c-tl"><div class="c-rank">${c.rank}</div><div class="c-suit-sm">${c.suit}</div></div>
     <div class="c-mid">${c.suit}</div>
-    <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
+    <div class="c-br"><div class="c-rank">${c.rank}</div><div class="c-suit-sm">${c.suit}</div></div>
+  </div>`;
 }
 
 function nrBack(w,h){
@@ -670,15 +675,15 @@ function renderGame(){
   if(state.kickCard){
     kc.style.display='block';
     const col=SC[state.kickCard.suit];
-    kc.innerHTML=`<div class="kick-card-hdr kc-${col}">
-      <div style="display:flex;flex-direction:column;line-height:1.1">
-        <div class="kc-rank">${state.kickCard.rank}</div>
-        <div class="kc-suit">${state.kickCard.suit}</div>
+    kc.innerHTML=`<div class="kick-card-hdr kc-${col}" style="position:relative;">
+      <div class="c-tl" style="position:absolute;top:4px;left:5px;display:flex;flex-direction:column;line-height:1;">
+        <div class="kc-rank" style="color:${col==='red'?'#cc0000':'#111'}">${state.kickCard.rank}</div>
+        <div class="kc-suit" style="color:${col==='red'?'#cc0000':'#111'}">${state.kickCard.suit}</div>
       </div>
-      <div class="kc-mid">${state.kickCard.suit}</div>
-      <div style="transform:rotate(180deg);display:flex;flex-direction:column;line-height:1.1">
-        <div class="kc-rank">${state.kickCard.rank}</div>
-        <div class="kc-suit">${state.kickCard.suit}</div>
+      <div class="kc-mid" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6rem;color:${col==='red'?'#cc0000':'#111'}">${state.kickCard.suit}</div>
+      <div class="c-br" style="position:absolute;bottom:4px;right:5px;display:flex;flex-direction:column;align-items:flex-end;line-height:1;transform:rotate(180deg);">
+        <div class="kc-rank" style="color:${col==='red'?'#cc0000':'#111'}">${state.kickCard.rank}</div>
+        <div class="kc-suit" style="color:${col==='red'?'#cc0000':'#111'}">${state.kickCard.suit}</div>
       </div>
     </div>`;
   } else kc.style.display='none';
@@ -777,10 +782,11 @@ function renderHand(canSee=true){
     const ri=realCards.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
     const ok=canPlay&&canPlayCard(c,realCards);
     const isTrump=state.trumpSuit&&c.suit===state.trumpSuit;
-    return`<div class="card ${SC[c.suit]} ${ok?'playable':''} ${isTrump?'trumpc':''}" onclick="${ok?`playCard(${ri})`:''}" style="width:68px;height:98px;">
-      <div class="c-top"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div>
+    return`<div class="card ${SC[c.suit]} ${ok?'playable':''} ${isTrump?'trumpc':''}" onclick="${ok?`playCard(${ri})`:''}" style="width:72px;height:104px;">
+      <div class="c-tl"><div class="c-rank">${c.rank}</div><div class="c-suit-sm">${c.suit}</div></div>
       <div class="c-mid">${c.suit}</div>
-      <div class="c-bot"><div class="c-rank">${c.rank}</div><div class="c-suit">${c.suit}</div></div></div>`;
+      <div class="c-br"><div class="c-rank">${c.rank}</div><div class="c-suit-sm">${c.suit}</div></div>
+    </div>`;
   }).join('');
 }
 

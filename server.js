@@ -99,7 +99,20 @@ wss.on('connection', (ws) => {
     else if (msg.type === 'update') {
       const room = rooms[myRoom];
       if (!room) return;
-      room.state = msg.state;
+      const incoming = msg.state;
+      // CRITICAL: Client only knows their own hand (others are {hidden:true}).
+      // Merge: keep the server's real hands for all roles except the sender's own hand.
+      if (incoming.hands) {
+        ['p0','p1','p2','p3'].forEach(r => {
+          if (r !== myRole) {
+            // Restore the real hand from server state, don't let hidden placeholders overwrite
+            if (room.state.hands && room.state.hands[r]) {
+              incoming.hands[r] = room.state.hands[r];
+            }
+          }
+        });
+      }
+      room.state = incoming;
       broadcastPersonalStates(room);
     }
 
