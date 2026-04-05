@@ -145,17 +145,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 .gcval{font-size:.88rem;font-weight:700;}
 
 /* Hand area */
-.handarea{padding:3px 4px 6px;flex-shrink:0;background:rgba(0,0,0,.25);}
+.handarea{padding:3px 4px 6px;flex-shrink:0;background:rgba(0,0,0,.25);
+  max-height:130px;overflow:hidden;}
 .mylbl{font-size:.58rem;color:rgba(255,255,255,.38);text-transform:uppercase;
   letter-spacing:.12em;margin-bottom:2px;text-align:center;}
-.handscroll{display:flex;justify-content:center;flex-wrap:nowrap;
+.handscroll{display:flex;justify-content:flex-start;flex-wrap:nowrap;
   overflow-x:auto;gap:3px;padding:2px 4px 4px;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.handscroll::-webkit-scrollbar{display:none;}
-.handscroll.many .card{width:50px;height:72px;}
-.handscroll.many .cmid{font-size:1.3rem;}
-.handscroll.many .crank{font-size:.76rem;}
-.handscroll.many .csuit{font-size:.64rem;}
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+  scrollbar-color:rgba(240,192,64,.3) transparent;}
+.handscroll::-webkit-scrollbar{height:3px;}
+.handscroll::-webkit-scrollbar-thumb{background:rgba(240,192,64,.3);border-radius:2px;}
+/* Always use a comfortable fixed card size in hand */
+.handscroll .card{width:60px;height:86px;flex-shrink:0;}
+.handscroll .card .cmid{font-size:1.6rem;}
+.handscroll .card .crank{font-size:.85rem;}
+.handscroll .card .csuit{font-size:.72rem;}
 
 /* CARDS */
 .card{width:var(--card-w);height:var(--card-h);border-radius:8px;background:#fff;
@@ -196,17 +200,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 .abtn2.wide{width:100%;padding:12px;margin-top:10px;}
 .abtn2:hover{filter:brightness(1.15);transform:translateY(-1px);}
 
-/* BEG / DEALER modals — slide up from bottom, DON'T cover hand */
-/* These are positioned as fixed bottom sheets that sit ABOVE the hand area */
-.bsheet{display:none;position:fixed;left:0;right:0;bottom:0;z-index:200;
-  flex-direction:column;align-items:stretch;}
-.bsheet.open{display:flex;}
-.bsheet-inner{background:linear-gradient(180deg,#1e0d45,#120830);
-  border:1px solid rgba(240,192,64,.3);border-top-left-radius:18px;border-top-right-radius:18px;
-  padding:16px 20px 20px;box-shadow:0 -8px 32px rgba(0,0,0,.7);}
-.bsheet-inner h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.25rem;margin-bottom:5px;}
-.bsheet-inner p{color:rgba(255,255,255,.58);font-size:.82rem;margin-bottom:14px;font-style:italic;line-height:1.4;}
-.bsheet-btns{display:flex;gap:10px;justify-content:center;}
+/* Inline action box — sits inside the status bar area, never overlaps hand */
+.inlineact{display:none;flex-direction:column;align-items:center;gap:6px;
+  background:rgba(0,0,0,.55);border:1px solid rgba(240,192,64,.25);
+  border-radius:14px;padding:10px 16px;width:100%;}
+.inlineact.show{display:flex;}
+.inlineact-title{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;}
+.inlineact-sub{color:rgba(255,255,255,.5);font-size:.76rem;font-style:italic;text-align:center;}
+.inlineact-btns{display:flex;gap:8px;justify-content:center;}
 
 /* Summary rows */
 .srow{display:flex;justify-content:space-between;padding:5px 0;
@@ -312,9 +313,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
       <!-- Trick grid -->
       <div class="trickgrid" id="trickGrid"></div>
 
-      <!-- Status -->
+      <!-- Status + inline actions -->
       <div class="cbot">
         <div class="statusbar" id="statusBar">Loading...</div>
+        <!-- Inline beg/dealer actions — appear here, NEVER overlap the hand -->
+        <div class="inlineact" id="inlineAct">
+          <div class="inlineact-title" id="inlineTitle"></div>
+          <div class="inlineact-sub" id="inlineSub"></div>
+          <div class="inlineact-btns" id="inlineBtns"></div>
+        </div>
       </div>
     </div>
 
@@ -344,30 +351,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 
 </div><!-- #gameScreen -->
 </div><!-- #app -->
-
-<!-- BEG popup — bottom sheet, does NOT cover hand -->
-<div class="bsheet" id="begModal">
-  <div class="bsheet-inner">
-    <h3>Beg or Stand?</h3>
-    <p>Trump is <strong id="begTrump" style="color:var(--gold)">—</strong>. Beg to ask dealer for more cards, or Stand to play as is.</p>
-    <div class="bsheet-btns">
-      <button class="abtn2 gold" onclick="doBeg()">🙏 Beg</button>
-      <button class="abtn2 red" onclick="doStand()">Stand</button>
-    </div>
-  </div>
-</div>
-
-<!-- DEALER popup — bottom sheet, does NOT cover hand -->
-<div class="bsheet" id="dealerModal">
-  <div class="bsheet-inner">
-    <h3>Give or Run the Pack?</h3>
-    <p><strong id="beggorName" style="color:var(--gold)">—</strong> is begging. Give them 1 point, or deal 3 more cards and kick a new trump?</p>
-    <div class="bsheet-btns">
-      <button class="abtn2 blue" onclick="doGive()">Give (+1)</button>
-      <button class="abtn2 gold" onclick="doRunPack()">Run the Pack 🃏</button>
-    </div>
-  </div>
-</div>
 
 <!-- Round summary -->
 <div class="modal" id="summaryModal">
@@ -408,7 +391,7 @@ function cardGV(c){return({A:4,K:3,Q:2,J:1,10:10}[c.rank])||0;}
 function rankTrick(c,trump,led){if(c.suit===trump)return 100+RANK_VAL[c.rank];if(c.suit===led)return RANK_VAL[c.rank];return 0;}
 function teamOf(r,teams){if(!teams)return null;if((teams.A||[]).includes(r))return'A';if((teams.B||[]).includes(r))return'B';return null;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function closeAllPopups(){['begModal','dealerModal'].forEach(id=>{document.getElementById(id).classList.remove('open');});}
+function closeAllPopups(){hideInlineAction();}
 function toast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);}
 function copyCode(){navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied!')).catch(()=>{});}
 
@@ -679,7 +662,7 @@ function renderHand(canSee=true){
   const cards=localOrder||state.hands[myRole]||[];
   const real=state.hands[myRole]||[];
   const canPlay=isMyTurn()&&state.phase==='playing';
-  hs.className='handscroll'+(cards.length>7?' many':'');
+  hs.className='handscroll';
   hs.innerHTML=cards.map(c=>{
     if(c.hidden)return'';
     const ri=real.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
@@ -718,19 +701,37 @@ function renderStatus(beggor){
   if(ph==='game_over'){const w=state.scores.A>=14?'A':'B';bar.textContent=`Game over! Team ${w} wins! 🎉`;}
 }
 
+function showInlineAction(title, sub, btns){
+  const el=document.getElementById('inlineAct');
+  document.getElementById('inlineTitle').textContent=title;
+  document.getElementById('inlineSub').textContent=sub;
+  document.getElementById('inlineBtns').innerHTML=btns;
+  el.classList.add('show');
+}
+function hideInlineAction(){
+  document.getElementById('inlineAct').classList.remove('show');
+}
+
 function handlePhaseUI(){
+  hideInlineAction();
   const di=ROLES.indexOf(state.dealer);
   const beggor=ROLES[(di+1)%4];
-  // Show beg popup to the beggor only
   if(state.phase==='bet'&&myRole===beggor){
-    document.getElementById('begTrump').textContent=state.trumpSuit||'?';
-    document.getElementById('begModal').classList.add('open');
+    showInlineAction(
+      'Beg or Stand?',
+      `Trump is ${state.trumpSuit||'?'} — Beg for more cards or Stand to play`,
+      `<button class="abtn2 gold" onclick="doBeg()">🙏 Beg</button>
+       <button class="abtn2 red" onclick="doStand()">Stand</button>`
+    );
     return;
   }
-  // Show dealer popup to dealer only
   if(state.phase==='dealer_choice'&&state.turn===myRole){
-    document.getElementById('beggorName').textContent=state[state.bettor]||'Opponent';
-    document.getElementById('dealerModal').classList.add('open');
+    showInlineAction(
+      'Give or Run the Pack?',
+      `${state[state.bettor]||'Opponent'} is begging`,
+      `<button class="abtn2 blue" onclick="doGive()">Give (+1)</button>
+       <button class="abtn2 gold" onclick="doRunPack()">Run the Pack 🃏</button>`
+    );
     return;
   }
   if(state.phase==='round_end')showSummary();
@@ -739,20 +740,21 @@ function handlePhaseUI(){
 
 // Beg actions
 function doBeg(){
-  document.getElementById('begModal').classList.remove('open');
-  if(myRole!==ROLES[(ROLES.indexOf(state.dealer)+1)%4])return;
+  hideInlineAction();
+  const di=ROLES.indexOf(state.dealer);
+  if(myRole!==ROLES[(di+1)%4])return;
   state.bettor=myRole;state.phase='dealer_choice';state.turn=state.dealer;
   send({type:'update',state});
 }
 function doStand(){
-  document.getElementById('begModal').classList.remove('open');
+  hideInlineAction();
   const di=ROLES.indexOf(state.dealer);
   if(myRole!==ROLES[(di+1)%4])return;
   state.phase='playing';state.turn=ROLES[(di+1)%4];
   send({type:'update',state});
 }
 function doGive(){
-  document.getElementById('dealerModal').classList.remove('open');
+  hideInlineAction();
   if(state.turn!==myRole)return;
   const bt=teamOf(state.bettor,state.teams);
   state.scores[bt]=(state.scores[bt]||0)+1;
@@ -762,7 +764,7 @@ function doGive(){
   send({type:'update',state});
 }
 function doRunPack(){
-  document.getElementById('dealerModal').classList.remove('open');
+  hideInlineAction();
   if(state.turn!==myRole)return;
   runThePack();
 }
