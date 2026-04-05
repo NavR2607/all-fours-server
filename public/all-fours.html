@@ -390,6 +390,12 @@ function handleMsg(msg){
     case 'lobby_update':state=msg.state;renderWaiting();break;
     case 'state':
       state=msg.state;myRole=state.myRole||myRole;localOrder=null;hideBegPopup();
+      // Debug: log hand info
+      if(state.hands && myRole){
+        const myHand=state.hands[myRole]||[];
+        const realCount=myHand.filter(c=>c&&!c.hidden).length;
+        console.log(`[State] phase=${state.phase} myRole=${myRole} dealer=${state.dealer} turn=${state.turn} hand=${myHand.length} real=${realCount}`);
+      }
       if(['lobby','team_select','waiting'].includes(state.phase)){
         document.getElementById('gameScreen').style.display='none';
         showScreen('waitingScreen');renderWaiting();
@@ -548,20 +554,28 @@ function nrBack(){
 // Render
 function renderGame(){
   if(!state)return;
-  const me=myRole,myIdx=ROLES.indexOf(me);
+  // Ensure myRole is always set correctly
+  if(state.myRole) myRole = state.myRole;
+  if(!myRole){ console.warn('myRole not set'); return; }
+
+  const me=myRole;
+  const myIdx=ROLES.indexOf(me);
+  if(myIdx===-1){ console.warn('myRole invalid:',me); return; }
+
   const rR=ROLES[(myIdx+1)%4],tR=ROLES[(myIdx+2)%4],lR=ROLES[(myIdx+3)%4];
   const di=ROLES.indexOf(state.dealer);
   const beggor=ROLES[(di+1)%4];
   const inBegPhase=state.phase==='bet'||state.phase==='dealer_choice';
 
-  // CARD VISIBILITY RULE:
-  // bet/dealer_choice phase → only beggor and dealer see cards, other 2 get NR backs
-  // ALL other phases → everyone sees their own cards
-  let canSee;
-  if(!inBegPhase){
-    canSee = true; // playing/round_end/game_over — always show
-  } else {
-    canSee = (me === beggor) || (me === state.dealer);
+  // CARD VISIBILITY:
+  // During bet/dealer_choice: beggor and dealer see their cards, other 2 get NR backs
+  // ALL other phases: everyone always sees their own cards
+  // If we can't determine role for any reason, default to showing cards
+  let canSee = true;
+  if(inBegPhase){
+    canSee = (me===beggor) || (me===state.dealer);
+    // Safety: if beggor/dealer is undefined, show cards
+    if(!beggor || !state.dealer) canSee = true;
   }
 
   // Scores
@@ -647,14 +661,24 @@ function renderHand(canSee=true){
   const rawHand=state.hands[myRole]||[];
   const realCards=rawHand.filter(c=>c&&!c.hidden);
 
+  // If canSee is false, show NR backs
   if(!canSee){
-    // Show NR backs for locked players
-    hc.innerHTML=Array(Math.max(rawHand.length,6)).fill(0).map(()=>nrBack()).join('');
+    hc.innerHTML=rawHand.map(()=>nrBack()).join('');
     return;
   }
 
-  const cards=localOrder&&localOrder.length>0?localOrder:realCards;
-  const canPlay=isMyTurn()&&state.phase==='playing';
+  // Show real cards — if somehow realCards is empty but rawHand isn't, something is wrong
+  // Show NR backs for any hidden placeholders from server
+  if(realCards.length===0 && rawHand.length>0){
+    // Cards came back as hidden even though we should see them
+    // This means server hasn't restored hands yet — show placeholder
+    hc.innerHTML=rawHand.map(()=>nrBack()).join('');
+    return;
+  }
+
+  const cards = (localOrder && localOrder.length>0) ? localOrder : realCards;
+  const canPlay = isMyTurn() && state.phase==='playing';
+
   hc.innerHTML=cards.map(c=>{
     if(!c||c.hidden)return'';
     const ri=realCards.findIndex(rc=>rc.rank===c.rank&&rc.suit===c.suit);
