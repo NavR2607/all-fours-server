@@ -20,21 +20,15 @@ function broadcastAll(room, msg) {
 
 function broadcastPersonalStates(room) {
   room.players.forEach(p => {
-    const ps = personalState(room.state, p.role);
-    sendTo(p.ws, { type: 'state', state: ps });
+    const s = JSON.parse(JSON.stringify(room.state));
+    ['p0','p1','p2','p3'].forEach(r => {
+      if (r !== p.role && s.hands && s.hands[r]) {
+        s.hands[r] = s.hands[r].map(() => ({ hidden: true }));
+      }
+    });
+    s.myRole = p.role;
+    sendTo(p.ws, { type: 'state', state: s });
   });
-}
-
-// Strip other players' hands so each player only sees their own cards
-function personalState(state, role) {
-  const s = JSON.parse(JSON.stringify(state));
-  ['p0','p1','p2','p3'].forEach(r => {
-    if (r !== role && s.hands && s.hands[r]) {
-      s.hands[r] = s.hands[r].map(() => ({ hidden: true }));
-    }
-  });
-  s.myRole = role;
-  return s;
 }
 
 wss.on('connection', (ws) => {
@@ -52,30 +46,16 @@ wss.on('connection', (ws) => {
         players: [{ ws, name: msg.name, role: 'p0' }],
         state: {
           p0: msg.name, p1: null, p2: null, p3: null,
-          playerCount: 1,
-          phase: 'lobby',
-          teams: null,
-          scores: { A: 0, B: 0 },
+          playerCount: 1, phase: 'lobby', teams: null,
+          scores: { A: 0, B: 0 }, gamesWon: { A: 0, B: 0 },
           hands: { p0: [], p1: [], p2: [], p3: [] },
-          deck: [],
-          trumpSuit: null,
-          dealer: 'p0',
-          turn: null,
-          betStatus: null, // null | 'bet' | 'stand'
-          bettor: null,
+          remainingDeck: [], trumpSuit: null, kickCard: null, kickBonuses: [],
+          dealer: 'p0', turn: null, bettor: null,
           trickCard: { p0: null, p1: null, p2: null, p3: null },
           trickWins: { p0: 0, p1: 0, p2: 0, p3: 0 },
-          ledSuit: null,
-          trickCount: 0,
-          highTrumpHolder: null,
-          lowTrumpHolder: null,
-          jackCaptured: null,
-          gamePoints: { p0: 0, p1: 0, p2: 0, p3: 0 },
-          kickCard: null,
-          kickBonuses: [],
-          round: 0,
-          roundPts: null,
-          action: '',
+          ledSuit: null, trickCount: 0, highHolder: null, lowHolder: null,
+          jackCaptured: null, gamePoints: { p0: 0, p1: 0, p2: 0, p3: 0 },
+          round: 0, roundSummary: null,
         }
       };
       sendTo(ws, { type: 'created', role: 'p0', state: rooms[myRoom].state });
@@ -86,12 +66,10 @@ wss.on('connection', (ws) => {
       const room = rooms[myRoom];
       if (!room) return sendTo(ws, { type: 'error', msg: 'Room not found — check the code' });
       if (room.players.length >= 4) return sendTo(ws, { type: 'error', msg: 'Room is full' });
-
       myRole = 'p' + room.players.length;
       room.players.push({ ws, name: msg.name, role: myRole });
       room.state[myRole] = msg.name;
       room.state.playerCount = room.players.length;
-
       sendTo(ws, { type: 'joined', role: myRole, state: room.state });
       broadcastAll(room, { type: 'lobby_update', state: room.state });
     }
@@ -100,15 +78,12 @@ wss.on('connection', (ws) => {
       const room = rooms[myRoom];
       if (!room) return;
       const incoming = msg.state;
-      // CRITICAL: Client only knows their own hand (others are {hidden:true}).
-      // Merge: keep the server's real hands for all roles except the sender's own hand.
-      if (incoming.hands) {
+      // CRITICAL: restore real hands for all players except sender
+      // Client only has their own real cards; others are {hidden:true}
+      if (incoming.hands && room.state.hands) {
         ['p0','p1','p2','p3'].forEach(r => {
           if (r !== myRole) {
-            // Restore the real hand from server state, don't let hidden placeholders overwrite
-            if (room.state.hands && room.state.hands[r]) {
-              incoming.hands[r] = room.state.hands[r];
-            }
+            incoming.hands[r] = room.state.hands[r] || [];
           }
         });
       }
@@ -122,7 +97,6 @@ wss.on('connection', (ws) => {
       room.state = msg.state;
       broadcastAll(room, { type: 'lobby_update', state: room.state });
     }
-
   });
 
   ws.on('close', () => {
