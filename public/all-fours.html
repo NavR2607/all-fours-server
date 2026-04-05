@@ -11,13 +11,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'In
 
 /* ── LOBBY/WAITING ── */
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;
-  width:100%;height:100%;padding:16px;overflow-y:auto;background:#111827;}
+  width:100%;height:100%;padding:16px;overflow-y:auto;
+  background:linear-gradient(135deg,#6d4c9e 0%,#8b5cf6 50%,#6d4c9e 100%);}
 .screen.active{display:flex;}
 .logo{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;
   color:#f0c040;text-shadow:2px 4px 0 rgba(0,0,0,.6);text-align:center;margin-bottom:4px;}
 .sub{color:rgba(255,255,255,.4);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:24px;}
-.panel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-  border-radius:16px;padding:22px;width:100%;max-width:360px;}
+.panel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  border-radius:16px;padding:22px;width:100%;max-width:360px;backdrop-filter:blur(10px);}
 .inp{width:100%;padding:11px 13px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
   border-radius:9px;color:#fff;font-size:1rem;outline:none;margin-bottom:10px;}
 .inp:focus{border-color:#f0c040;}.inp::placeholder{color:rgba(255,255,255,.3);}
@@ -552,13 +553,16 @@ function renderGame(){
   const di=ROLES.indexOf(state.dealer);
   const beggor=ROLES[(di+1)%4];
   const inBegPhase=state.phase==='bet'||state.phase==='dealer_choice';
-  // The beggor and dealer ALWAYS see their cards
-  // Only the OTHER two players get NR backs during beg phase
-  const isInvolved = (me===beggor)||(me===state.dealer);
-  const canSee = !inBegPhase || isInvolved;
-  // Extra safety: if playing/round_end/game_over always show
-  const alwaysShow = ['playing','round_end','game_over'].includes(state.phase);
-  const finalCanSee = canSee || alwaysShow;
+
+  // CARD VISIBILITY RULE:
+  // bet/dealer_choice phase → only beggor and dealer see cards, other 2 get NR backs
+  // ALL other phases → everyone sees their own cards
+  let canSee;
+  if(!inBegPhase){
+    canSee = true; // playing/round_end/game_over — always show
+  } else {
+    canSee = (me === beggor) || (me === state.dealer);
+  }
 
   // Scores
   const gw=state.gamesWon||{A:0,B:0};
@@ -633,7 +637,7 @@ function renderGame(){
   const isMeDlr=state.dealer===myRole;
   document.getElementById('handLbl').textContent=
     `${state[me]||myName||'You'} · Team ${teamOf(me,state.teams)||'?'}${isMeDlr?' · DEALER':''}`;
-  renderHand(finalCanSee);
+  renderHand(canSee);
 }
 
 function renderHand(canSee=true){
