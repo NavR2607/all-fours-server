@@ -574,9 +574,14 @@ function doRunPack(){hideBegPopup();action('run_pack');}
 
 function canPlayCard(card,hand){
   const trump=state.trumpSuit,led=state.ledSuit;
+  // No card led yet — anything goes
   if(!led)return true;
-  const hasSuit=hand.some(c=>c.suit===led&&c.suit!==trump);
+  // Trump can ALWAYS be played at any time — no restrictions
+  if(card.suit===trump)return true;
+  // If player has the led suit, they must follow it
+  const hasSuit=hand.some(c=>c.suit===led);
   if(hasSuit)return card.suit===led;
+  // Player has no led suit and not playing trump — can play any card
   return true;
 }
 function playCard(idx){

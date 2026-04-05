@@ -229,6 +229,16 @@ wss.on('connection', (ws) => {
         const hand = state.hands[myRole] || [];
         const card = hand[cardIdx];
         if (!card) return;
+
+        // TRINIDAD RULES: Trump can always be played.
+        // Must follow led suit only if not playing trump.
+        // If no led suit card in hand, play anything.
+        const led = state.ledSuit;
+        if (led && card.suit !== state.trumpSuit) {
+          const hasSuit = hand.some(c => c.suit === led);
+          if (hasSuit && card.suit !== led) return; // invalid play
+        }
+
         // Remove card from hand
         state.hands[myRole] = hand.filter((_, i) => i !== cardIdx);
         state.trickCard[myRole] = card;
