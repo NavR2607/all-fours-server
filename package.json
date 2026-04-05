@@ -1,6 +1,7 @@
 {
-  "name": "all-fours-server",
+  "name": "all-fours",
   "version": "1.0.0",
+  "description": "All Fours — Trinidad card game",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "dependencies": {
