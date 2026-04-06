@@ -463,7 +463,12 @@ function emit(m){if(ws&&ws.readyState===1)ws.send(JSON.stringify(m));}
 function handleMsg(msg){
   if (msg.type==='created')       {myRole=msg.role;state=msg.state;localSortedHand=null;showWaiting();}
   else if (msg.type==='joined')   {myRole=msg.role;state=msg.state;localSortedHand=null;showWaiting();}
-  else if (msg.type==='lobby_update'){state=msg.state;renderWaiting();}
+  else if (msg.type==='lobby_update'){
+    state=msg.state;
+    // Sync local pickedTeams from server so non-host players see correct teams
+    if(state.teams){pickedTeams={A:[...state.teams.A],B:[...state.teams.B]};}
+    renderWaiting();
+  }
   else if (msg.type==='state'){
     const prevPhase=state?.phase;
     state=msg.state;
@@ -514,44 +519,44 @@ function showErr(msg){
 // ══════════════════════════════════════════════════════════════════
 //  Team Picker
 // ══════════════════════════════════════════════════════════════════
-// Local team assignment (host only), default p0+p2 vs p1+p3
 let pickedTeams={A:['p0','p2'],B:['p1','p3']};
 
 function renderTeamPicker(){
   const wrap=document.getElementById('teamPickerWrap');
   if(myRole!=='p0'||!state){wrap.style.display='none';return;}
   wrap.style.display='block';
-  const players=['p0','p1','p2','p3'].filter(r=>state[r]);
-  // Use pickedTeams
   ['A','B'].forEach(team=>{
     [0,1].forEach(i=>{
       const slot=document.getElementById(`tp-${team}${i}`);
       const role=pickedTeams[team][i];
       const n=state[role];
-      slot.textContent=n||'—';
-      slot.className=`tp-slot ${n?'has-player':''}`;
+      slot.textContent=n||role;
+      slot.className='tp-slot'+(n?' has-player':'');
     });
   });
 }
 
 function cycleTeamSlot(team,idx){
-  // Cycle through available players for this slot
-  const all=['p0','p1','p2','p3'].filter(r=>state[r]);
+  if(!state)return;
+  const all=['p0','p1','p2','p3'];
   const current=pickedTeams[team][idx];
-  const otherTeam=team==='A'?'B':'A';
-  const occupied=[
-    pickedTeams.A[0],pickedTeams.A[1],
-    pickedTeams.B[0],pickedTeams.B[1]
-  ].filter((_,i)=>!(i===(['A','B'].indexOf(team)*2+idx)));
-
-  // Find next player not in other slots
-  let nextIdx=(all.indexOf(current)+1)%all.length;
-  let tries=0;
-  while(occupied.includes(all[nextIdx])&&tries<4){nextIdx=(nextIdx+1)%all.length;tries++;}
-  pickedTeams[team][idx]=all[nextIdx];
+  // Collect all roles in OTHER slots
+  const otherRoles=[];
+  ['A','B'].forEach(t=>{
+    [0,1].forEach(j=>{
+      if(!(t===team&&j===idx)) otherRoles.push(pickedTeams[t][j]);
+    });
+  });
+  // Advance past current, skip any role already used elsewhere
+  let next=(all.indexOf(current)+1)%4;
+  for(let tries=0;tries<4;tries++){
+    if(!otherRoles.includes(all[next]))break;
+    next=(next+1)%4;
+  }
+  pickedTeams[team][idx]=all[next];
   renderTeamPicker();
-  // Send to server
-  emit({type:'set_teams',teamA:pickedTeams.A,teamB:pickedTeams.B});
+  renderWaiting();
+  emit({type:'set_teams',teamA:[...pickedTeams.A],teamB:[...pickedTeams.B]});
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -769,12 +774,14 @@ function showRoundModal(){
   const pts=s.roundPts||{A:0,B:0};
   document.getElementById('rndTitle').textContent='Round Over';
 
+  const SSYM={S:'♠',H:'♥',D:'♦',C:'♣'};
+  const fmtCard=c=>{if(!c)return'';const r=c.slice(0,-1),s=c.slice(-1);const sym=SSYM[s]||s;const col=(s==='H'||s==='D')?'#dc2626':'#1a1a2e';return `<span style="font-weight:700">${r}<span style="color:${col}">${sym}</span></span>`;};
   const rows=[
-    {lbl:'High',      a:det.A.high?`${det.A.high} +1`:'',          b:det.B.high?`${det.B.high} +1`:''},
-    {lbl:'Low',       a:det.A.low?`${det.A.low} +1`:'',            b:det.B.low?`${det.B.low} +1`:''},
-    {lbl:'Jack',      a:det.A.jack?'Jack +1':'',                    b:det.B.jack?'Jack +1':''},
-    {lbl:'Hang Jack', a:det.A.hangJack?'Hang Jack +3':'',           b:det.B.hangJack?'Hang Jack +3':''},
-    {lbl:'Game (×2)', a:det.A.game?`${det.A.game}pts +2`:'',       b:det.B.game?`${det.B.game}pts +2`:''},
+    {lbl:'High',      a:det.A.high?`${fmtCard(det.A.high)} ↑1`:'',      b:det.B.high?`${fmtCard(det.B.high)} ↑1`:''},
+    {lbl:'Low',       a:det.A.low?`${fmtCard(det.A.low)} ↑1`:'',        b:det.B.low?`${fmtCard(det.B.low)} ↑1`:''},
+    {lbl:'Jack',      a:det.A.jack?`J${SSYM[s.trumpSuit]||''} ↑1`:'',   b:det.B.jack?`J${SSYM[s.trumpSuit]||''} ↑1`:''},
+    {lbl:'Hang Jack', a:det.A.hangJack?'Hang Jack ↑3':'',                b:det.B.hangJack?'Hang Jack ↑3':''},
+    {lbl:'Game (×2)', a:det.A.game?`${det.A.game}pts ↑2`:'',            b:det.B.game?`${det.B.game}pts ↑2`:''},
   ].filter(r=>r.a||r.b);
 
   document.getElementById('sumBody').innerHTML=rows.length
@@ -783,8 +790,8 @@ function showRoundModal(){
         <td class="pts" style="color:var(--teamB)">${r.b}</td></tr>`).join('')
     :`<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:.78rem">No points scored this round</td></tr>`;
 
-  document.getElementById('totA').innerHTML=`<span class="pts" style="color:var(--teamA)">+${pts.A}</span>`;
-  document.getElementById('totB').innerHTML=`<span class="pts" style="color:var(--teamB)">+${pts.B}</span>`;
+  document.getElementById('totA').innerHTML=`<span class="pts" style="color:var(--teamA)">↑${pts.A}</span>`;
+  document.getElementById('totB').innerHTML=`<span class="pts" style="color:var(--teamB)">↑${pts.B}</span>`;
   document.getElementById('scoreLine').textContent=`Running total — Team A: ${s.scores.A}  ·  Team B: ${s.scores.B}  (first to 14)`;
 
   const ra=document.getElementById('rndActions');
