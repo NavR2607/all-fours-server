@@ -147,11 +147,15 @@ function playCard(state, role, card) {
   const hand = state.hands[role] || [];
   if (!hand.includes(card))      return 'Card not in hand';
 
-  // Follow suit rule
+  // Trump can always be played freely; non-trump must follow lead suit if you have it
   if (Object.keys(state.trick).length > 0) {
     const leadSuit = suit(state.trick[state.trickLead]);
-    const hasSuit  = hand.some(c => suit(c)===leadSuit);
-    if (hasSuit && suit(card)!==leadSuit) return 'Must follow suit';
+    const cardSuit = suit(card);
+    const isTrump  = cardSuit === state.trumpSuit;
+    if (!isTrump) {
+      const hasSuit = hand.some(c => suit(c) === leadSuit && suit(c) !== state.trumpSuit);
+      if (hasSuit && cardSuit !== leadSuit) return 'Must follow suit (or play trump)';
+    }
   }
 
   state.hands[role] = hand.filter(c=>c!==card);
@@ -227,8 +231,8 @@ function scoreRound(state) {
 
   const gpA = teams.A.reduce((s,r)=>s+(state.gamePointsWon[r]||0),0);
   const gpB = teams.B.reduce((s,r)=>s+(state.gamePointsWon[r]||0),0);
-  if (gpA > gpB)      { pts.A++; det.A.game = gpA; }
-  else if (gpB > gpA) { pts.B++; det.B.game = gpB; }
+  if (gpA > gpB)      { pts.A += 2; det.A.game = gpA; det.A.gameVal = 2; }
+  else if (gpB > gpA) { pts.B += 2; det.B.game = gpB; det.B.gameVal = 2; }
 
   state.scores.A = (state.scores.A||0) + pts.A;
   state.scores.B = (state.scores.B||0) + pts.B;
@@ -297,9 +301,22 @@ wss.on('connection', ws => {
     else if (msg.type === 'start_game') {
       if (!room||myRole!=='p0') return;
       if (room.players.length<4) return send(ws,{type:'error',msg:'Need 4 players to start'});
-      s.teams={A:['p0','p2'],B:['p1','p3']};
+      // Use host-chosen teams if set, otherwise default p0+p2 vs p1+p3
+      if (!s.teams) s.teams={A:['p0','p2'],B:['p1','p3']};
       s.dealer='p0'; s.scores={A:0,B:0}; s.gamesWon={A:0,B:0}; s.round=1;
       startRound(s); broadcastState(room);
+    }
+
+    else if (msg.type === 'set_teams') {
+      // Host picks teams: msg.teamA = ['p0','p2'], msg.teamB = ['p1','p3']
+      if (!room||myRole!=='p0') return;
+      if (s.phase !== 'lobby') return send(ws,{type:'error',msg:'Can only set teams in lobby'});
+      const tA = msg.teamA, tB = msg.teamB;
+      if (!tA||!tB||tA.length!==2||tB.length!==2) return send(ws,{type:'error',msg:'Invalid teams'});
+      const all = [...tA,...tB].sort().join(',');
+      if (all !== 'p0,p1,p2,p3') return send(ws,{type:'error',msg:'Must include all 4 players'});
+      s.teams = {A: tA, B: tB};
+      broadcastAll(room,{type:'lobby_update',state:playerView(s,'p0')});
     }
 
     else if (msg.type === 'deal') {
