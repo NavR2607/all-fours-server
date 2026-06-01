@@ -268,6 +268,7 @@ body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;background:var(
       </div>
     </div>
 
+    <button id="addBotBtn" class="btn btn-secondary" onclick="doAddBot()" style="display:none;margin-top:.5rem">+ Add Bot</button>
     <button id="startBtn" class="btn btn-gold" onclick="doStart()" style="display:none;margin-top:.5rem">▶ Start Game</button>
     <div id="waitHint" style="font-size:.76rem;color:var(--text-muted);text-align:center;margin-top:.5rem"></div>
     <button class="btn btn-secondary" style="margin-top:.65rem" onclick="leaveRoom()">Leave</button>
@@ -427,8 +428,7 @@ function mkCard(code, sizeClass='', playable=false) {
     return `<div class="card back ${sizeClass}"><div class="ci"></div></div>`;
   const r=code.slice(0,-1), s=code.slice(-1);
   const sym=SYM[s]||s, cl=CLR[s]||'black';
-  const oc=playable?`onclick="playCard('${code}')"`:'';;
-  return `<div class="card ${sizeClass} ${playable?'playable':''}" ${oc}>
+  const oc=playable?`onclick="playCard('${code}')"`:'';  return `<div class="card ${sizeClass} ${playable?'playable':''}" ${oc}>
     <div class="ci">
       <div><div class="cr ${cl}">${r}</div><div class="cs ${cl}">${sym}</div></div>
       <div style="transform:rotate(180deg)"><div class="cr ${cl}">${r}</div><div class="cs ${cl}">${sym}</div></div>
@@ -576,9 +576,15 @@ function renderWaiting(){
   renderTeamPicker();
   const pc=state?.playerCount||0;
   const sb=document.getElementById('startBtn');
+  const ab=document.getElementById('addBotBtn');
   const wh=document.getElementById('waitHint');
-  if(myRole==='p0'&&pc>=4){sb.style.display='block';wh.textContent='All players ready!';}
-  else{sb.style.display='none';wh.textContent=`${pc}/4 players · code: ${myRoom}`;}
+  if(myRole==='p0'&&pc>=4){
+    sb.style.display='block';ab.style.display='none';wh.textContent='All players ready!';
+  } else if(myRole==='p0'&&pc<4){
+    sb.style.display='none';ab.style.display='block';wh.textContent=`${pc}/4 players · code: ${myRoom}`;
+  } else {
+    sb.style.display='none';ab.style.display='none';wh.textContent=`${pc}/4 players · code: ${myRoom}`;
+  }
 }
 
 function getTeamFromPicked(role){
@@ -823,6 +829,7 @@ function showGameOver(){
 // ══════════════════════════════════════════════════════════════════
 //  Actions
 // ══════════════════════════════════════════════════════════════════
+function doAddBot(){emit({type:'add_bot'});}
 function doStart(){
   emit({type:'set_teams',teamA:pickedTeams.A,teamB:pickedTeams.B});
   setTimeout(()=>emit({type:'start_game'}),100);

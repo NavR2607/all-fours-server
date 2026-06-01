@@ -17,7 +17,8 @@ function broadcastAll(room, msg) {
 }
 function broadcastState(room) {
   for (const p of room.players)
-    send(p.ws, { type: 'state', state: playerView(room.state, p.role) });
+    if (!p.isBot) send(p.ws, { type: 'state', state: playerView(room.state, p.role) });
+  scheduleBotAction(room);
 }
 
 // Each player only sees their own hand; during beg phase only dealer+beggar see theirs
@@ -218,7 +219,8 @@ function playCard(state, role, card) {
 }
 
 function resolveTrick(state) {
-  const ts    = state.trumpSuit;
+  const ts       = state.trumpSuit;
+  const leadSuit = suit(state.trick[state.trickLead]);
   let winner  = state.trickLead;
   let winCard = state.trick[state.trickLead];
 
@@ -227,6 +229,10 @@ function resolveTrick(state) {
     const wT = suit(winCard) === ts, cT = suit(c) === ts;
     if (wT && !cT) continue;
     if (!wT && cT) { winner = r; winCard = c; continue; }
+    // Neither is trump — only the lead suit can beat the lead suit
+    const wL = suit(winCard) === leadSuit, cL = suit(c) === leadSuit;
+    if (wL && !cL) continue;
+    if (!wL && cL) { winner = r; winCard = c; continue; }
     if (rankVal(c) > rankVal(winCard)) { winner = r; winCard = c; }
   }
 
@@ -301,6 +307,157 @@ function scoreRound(state) {
   }
 }
 
+// ─── Bot Logic ───────────────────────────────────────────────────────────────
+const BOT_NAMES = ['Bot Alpha', 'Bot Beta', 'Bot Gamma', 'Bot Delta'];
+
+function getLegalCards(state, role) {
+  const hand = state.hands[role] || [];
+  if (!hand.length) return [];
+  const ts = state.trumpSuit;
+  const trickLen = Object.keys(state.trick).length;
+  if (trickLen === 0) return hand;
+
+  const leadCard  = state.trick[state.trickLead];
+  const leadSuit  = suit(leadCard);
+  const leadTrump = leadSuit === ts;
+
+  if (leadTrump || state.trumpCalled) {
+    const trumps = hand.filter(c => suit(c) === ts);
+    return trumps.length ? trumps : hand;
+  }
+  const leadSuitCards = hand.filter(c => suit(c) === leadSuit);
+  if (leadSuitCards.length) {
+    return [...leadSuitCards, ...hand.filter(c => suit(c) === ts)];
+  }
+  // Void in lead suit — must overtrump if possible
+  const ts_cards = hand.filter(c => suit(c) === ts);
+  if (ts_cards.length) {
+    const trumpsInTrick = Object.values(state.trick).filter(c => suit(c) === ts);
+    if (trumpsInTrick.length) {
+      const highInTrick = Math.max(...trumpsInTrick.map(rankVal));
+      const better = ts_cards.filter(c => rankVal(c) > highInTrick);
+      return better.length ? better : hand;
+    }
+    return hand;
+  }
+  return hand;
+}
+
+function botChooseCard(state, role) {
+  const ts     = state.trumpSuit;
+  const legal  = getLegalCards(state, role);
+  const myTeam = teamOf(role, state.teams);
+  const trickLen = Object.keys(state.trick).length;
+
+  const byRankDesc = arr => [...arr].sort((a, b) => rankVal(b) - rankVal(a));
+  const byRankAsc  = arr => [...arr].sort((a, b) => rankVal(a) - rankVal(b));
+  const trumps     = legal.filter(c => suit(c) === ts);
+  const nonTrumps  = legal.filter(c => suit(c) !== ts);
+
+  if (trickLen === 0) {
+    // Leading — lead highest trump if we have trumps, else highest card
+    if (trumps.length) return byRankDesc(trumps)[0];
+    return byRankDesc(legal)[0];
+  }
+
+  // Determine current trick winner
+  const leadSuit = suit(state.trick[state.trickLead]);
+  let curWinner = state.trickLead, curWinCard = state.trick[state.trickLead];
+  for (const [r, c] of Object.entries(state.trick)) {
+    if (r === curWinner) continue;
+    const wT = suit(curWinCard) === ts, cT2 = suit(c) === ts;
+    if (wT && !cT2) continue;
+    if (!wT && cT2) { curWinner = r; curWinCard = c; continue; }
+    const wL = suit(curWinCard) === leadSuit, cL2 = suit(c) === leadSuit;
+    if (wL && !cL2) continue;
+    if (!wL && cL2) { curWinner = r; curWinCard = c; continue; }
+    if (rankVal(c) > rankVal(curWinCard)) { curWinner = r; curWinCard = c; }
+  }
+  const partnerWinning = teamOf(curWinner, state.teams) === myTeam;
+
+  if (partnerWinning) {
+    // Partner is winning — discard lowest non-trump, else lowest trump
+    return nonTrumps.length ? byRankAsc(nonTrumps)[0] : byRankAsc(trumps)[0];
+  }
+
+  // Try to win the trick
+  const canBeat = c => {
+    const cT = suit(c) === ts, wT = suit(curWinCard) === ts;
+    if (wT && !cT) return false;
+    if (!wT && cT) return true;
+    const wL = suit(curWinCard) === leadSuit, cL = suit(c) === leadSuit;
+    if (wL && !cL) return false;
+    if (!wL && cL) return true;
+    return rankVal(c) > rankVal(curWinCard);
+  };
+  const winners = legal.filter(canBeat);
+  if (winners.length) return byRankAsc(winners)[0]; // win cheaply
+  // Can't win — discard lowest non-trump, else lowest trump
+  return nonTrumps.length ? byRankAsc(nonTrumps)[0] : byRankAsc(trumps)[0];
+}
+
+function scheduleBotAction(room) {
+  const s = room.state;
+  let botRole = null;
+
+  if (s.phase === 'bet')        botRole = s.beggar;
+  else if (s.phase === 'give_one')  botRole = s.dealer;
+  else if (s.phase === 'flip_again') botRole = s.dealer;
+  else if (s.phase === 'redeal')    botRole = s.dealer;
+  else if (s.phase === 'playing')   botRole = s.turn;
+  else if (s.phase === 'round_over') botRole = s.dealer;
+
+  if (!botRole) return;
+  const bp = room.players.find(p => p.isBot && p.role === botRole);
+  if (!bp) return;
+
+  setTimeout(() => {
+    if (!rooms[room.code] || room.state !== s) return; // room/state may have changed
+    const cs = room.state;
+
+    if (cs.phase === 'bet' && cs.beggar === bp.role) {
+      const hand   = cs.hands[bp.role] || [];
+      const ts     = cs.trumpSuit;
+      const trumps = hand.filter(c => suit(c) === ts);
+      const hasHighTrump = trumps.some(c => rankVal(c) >= 11);
+      if (trumps.length >= 2 || hasHighTrump) {
+        beginPlaying(cs);
+      } else {
+        cs.phase  = 'give_one';
+        cs.action = `${pname(cs, cs.dealer)} — Give One or Run Pack?`;
+      }
+      broadcastState(room);
+
+    } else if (cs.phase === 'give_one' && cs.dealer === bp.role) {
+      const hand   = cs.hands[bp.role] || [];
+      const ts     = cs.trumpSuit;
+      const trumps = hand.filter(c => suit(c) === ts);
+      if (trumps.length >= 2) { runPack(cs); }
+      else { const bt = teamOf(cs.beggar, cs.teams); if (bt) cs.scores[bt]++; beginPlaying(cs); }
+      broadcastState(room);
+
+    } else if (cs.phase === 'flip_again' && cs.dealer === bp.role) {
+      flipAgain(cs); broadcastState(room);
+
+    } else if (cs.phase === 'redeal' && cs.dealer === bp.role) {
+      startRound(cs); broadcastState(room);
+
+    } else if (cs.phase === 'playing' && cs.turn === bp.role) {
+      const card = botChooseCard(cs, bp.role);
+      const err  = playCard(cs, bp.role, card);
+      if (err) {
+        const hand = cs.hands[bp.role] || [];
+        if (hand.length) playCard(cs, bp.role, hand[0]);
+      }
+      broadcastState(room);
+
+    } else if (cs.phase === 'round_over' && cs.dealer === bp.role) {
+      cs.round = (cs.round || 1) + 1;
+      startRound(cs); broadcastState(room);
+    }
+  }, 900);
+}
+
 // ─── Initial State ───────────────────────────────────────────────────────────
 function makeState() {
   return {
@@ -339,7 +496,7 @@ wss.on('connection', ws => {
       state.p0 = msg.name; state.playerCount = 1;
       // Set default teams so team picker shows something immediately
       state.teams = { A: ['p0','p2'], B: ['p1','p3'] };
-      rooms[code] = { players: [{ ws, role:'p0', name:msg.name }], state };
+      rooms[code] = { code, players: [{ ws, role:'p0', name:msg.name }], state };
       send(ws, { type:'created', role:'p0', state: playerView(state, 'p0') });
     }
 
@@ -367,6 +524,18 @@ wss.on('connection', ws => {
       if (allRoles !== 'p0,p1,p2,p3')
         return send(ws, { type:'error', msg:'Teams must include all 4 players' });
       s.teams = { A: tA, B: tB };
+      broadcastAll(room, { type:'lobby_update', state: s });
+    }
+
+    // ADD BOT
+    else if (msg.type === 'add_bot') {
+      if (!room || myRole !== 'p0') return;
+      if (room.players.length >= 4) return send(ws, { type:'error', msg:'Room is already full' });
+      const botRole = 'p' + room.players.length;
+      const botName = BOT_NAMES[room.players.length - 1] || `Bot ${room.players.length}`;
+      s[botRole] = botName;
+      s.playerCount = room.players.length + 1;
+      room.players.push({ ws: null, role: botRole, name: botName, isBot: true });
       broadcastAll(room, { type:'lobby_update', state: s });
     }
 
